@@ -32,7 +32,6 @@
                 <input type="date" id="workout-date" required>
             </div>
 
-            <!-- IZOMCSOPORT VÁLASZTÓ -->
             <div class="form-group">
                 <label for="muscle-group">Izomcsoport:</label>
                 <select id="muscle-group">
@@ -47,7 +46,6 @@
                 </select>
             </div>
 
-            <!-- GYORSGYAKORLAT GOMBOK KONTÉNERE -->
             <div class="form-group">
                 <label>Kattints a gyakorlatra (vagy írd be alább):</label>
                 <div id="quick-exercises" class="chip-container"></div>
@@ -59,16 +57,12 @@
                 <small id="history-hint" class="hint"></small>
             </div>
 
-            <!-- DINAMIKUS SÚLYZÓS SOROZATOK -->
             <div id="resistance-fields">
                 <label class="section-label">Sorozatok:</label>
-                <div id="sets-container">
-                    <!-- Dinamikusan generált sorozat sorok -->
-                </div>
+                <div id="sets-container"></div>
                 <button type="button" id="add-set-btn" class="secondary-btn-full">+ SOROZAT HOZZÁADÁSA</button>
             </div>
 
-            <!-- KARDIÓ MEZŐK -->
             <div id="cardio-fields" class="form-row hidden">
                 <div class="form-group">
                     <label for="cardio-time">Idő (perc):</label>
@@ -85,7 +79,7 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
-                <label for="note">Megjegyzés (pl. könnyű volt, 2. fokozat):</label>
+                <label for="note">Megjegyzés:</label>
                 <input type="text" id="note" placeholder="Opcionális megjegyzés">
             </div>
 
@@ -95,7 +89,11 @@
         <!-- 3. KERESŐ ÉS ELŐZMÉNYEK -->
         <div class="action-header">
             <h2>Mai és korábbi edzések</h2>
-            <button id="export-btn" class="secondary-btn">💾 Adatok letöltése</button>
+            <div class="btn-group">
+                <button id="import-btn" class="secondary-btn">📥 Adatok feltöltése</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;">
+                <button id="export-btn" class="secondary-btn">💾 Adatok letöltése</button>
+            </div>
         </div>
 
         <div class="form-group">
