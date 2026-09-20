@@ -79,6 +79,7 @@ const defaultExercises = {
     'Tricepsz': ['Tricepsz letolás csigán', 'Lónyomás'],
     'Váll': ['Vállból nyomás kézisúlyzóval', 'Oldalemelés'],
     'Láb': ['Guggolás', 'Lábnyomás', 'Lábhajlítás gépen'],
+    'Popsi': ['Csípőemelés (Hip Thrust)', 'Bolgár guggolás', 'Glute Bridge (Híd)', 'Kickback csigán', 'Román felhúzás'],
     'Has': ['Hasprés', 'Lábelemelés függeszkedve'],
     'Kardió': ['Futópad (Incline walking)', 'Lépcsőzőgép', 'Szobakerékpár']
 };
@@ -157,7 +158,6 @@ function renderCalendar() {
     const totalDays = new Date(year, month + 1, 0).getDate();
     const workouts = getWorkoutsFromStorage();
     
-    // Gyűjtsük ki, hogy melyik napon milyen edzések voltak
     const workoutsByDate = {};
     workouts.forEach(w => {
         if (!workoutsByDate[w.date]) workoutsByDate[w.date] = [];
@@ -226,7 +226,6 @@ function closeDayModal() {
     dayModal.classList.add('hidden');
 }
 
-// Bezárás ha a modál háttérre kattintanak
 window.addEventListener('click', (e) => {
     if (e.target === dayModal) closeDayModal();
 });
@@ -454,7 +453,7 @@ function openTemplateBuilder(templateIndex = null) {
 
 function renderTemplateMuscleChips() {
     templateMuscleChips.innerHTML = '';
-    ['Mell', 'Bicepsz', 'Hát', 'Tricepsz', 'Váll', 'Láb', 'Has', 'Kardió'].forEach(group => {
+    ['Mell', 'Bicepsz', 'Hát', 'Tricepsz', 'Váll', 'Láb', 'Popsi', 'Has', 'Kardió'].forEach(group => {
         const isSelected = builderSelectedMuscles.includes(group);
         const chip = document.createElement('div');
         chip.className = `chip ${isSelected ? 'active' : ''}`;
