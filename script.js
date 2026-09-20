@@ -174,7 +174,7 @@ function loadBodyRecords() {
     records.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (records.length === 0) {
-        bodyList.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Nincsenek rögzített testadatok.</td></tr>';
+        bodyList.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888;">Nincsenek rögzített testadatok.</td></tr>';
         return;
     }
 
@@ -186,6 +186,8 @@ function loadBodyRecords() {
             <td>${rec.fat}%</td>
             <td>${rec.chest} cm</td>
             <td>${rec.arm} cm</td>
+            <td>${rec.waist} cm</td>
+            <td>${rec.thigh} cm</td>
             <td><button class="delete-btn" onclick="deleteBodyRecord(${rec.id})">X</button></td>
         `;
         bodyList.appendChild(tr);
