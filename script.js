@@ -60,16 +60,14 @@ function toggleStopwatch() {
         clearInterval(swInterval);
         swInterval = null;
         btn.textContent = 'Folytatás';
-        btn.style.backgroundColor = 'var(--accent-color)';
-        btn.style.color = '#000';
+        btn.style.backgroundColor = '#00e676';
     } else {
         swInterval = setInterval(() => {
             swSeconds++;
             updateStopwatchDisplay();
         }, 1000);
         btn.textContent = 'Szünet';
-        btn.style.backgroundColor = 'var(--danger-color)';
-        btn.style.color = '#fff';
+        btn.style.backgroundColor = '#ff5252';
     }
 }
 
@@ -80,8 +78,7 @@ function resetStopwatch() {
     updateStopwatchDisplay();
     const btn = document.getElementById('sw-start-btn');
     btn.textContent = 'Indítás';
-    btn.style.backgroundColor = 'var(--accent-color)';
-    btn.style.color = '#000';
+    btn.style.backgroundColor = '#00e676';
 }
 
 function updateStopwatchDisplay() {
@@ -118,8 +115,7 @@ function toggleCountdown() {
         clearInterval(cdInterval);
         cdInterval = null;
         btn.textContent = 'Folytatás';
-        btn.style.backgroundColor = 'var(--accent-color)';
-        btn.style.color = '#000';
+        btn.style.backgroundColor = '#00e676';
     } else {
         if (cdTotalSeconds <= 0) updateCountdownFromInputs();
         if (cdTotalSeconds <= 0) return;
@@ -135,15 +131,13 @@ function toggleCountdown() {
                 clearInterval(cdInterval);
                 cdInterval = null;
                 btn.textContent = 'Indítás';
-                btn.style.backgroundColor = 'var(--accent-color)';
-                btn.style.color = '#000';
+                btn.style.backgroundColor = '#00e676';
                 alert('⏱️ Letelt az idő!');
             }
         }, 1000);
 
         btn.textContent = 'Szünet';
-        btn.style.backgroundColor = 'var(--danger-color)';
-        btn.style.color = '#fff';
+        btn.style.backgroundColor = '#ff5252';
     }
 }
 
@@ -153,11 +147,10 @@ function resetCountdown() {
     updateCountdownFromInputs();
     const btn = document.getElementById('cd-start-btn');
     btn.textContent = 'Indítás';
-    btn.style.backgroundColor = 'var(--accent-color)';
-    btn.style.color = '#000';
+    btn.style.backgroundColor = '#00e676';
 }
 
-// --- GYAKORLATOK SZŰRÉSE ÉS CSEMPÉK (CHIPEK) ---
+// --- GYAKORLATOK KELÉS ÉS CSEMPÉK (CHIPEK) ---
 
 function filterExercisesByCategory() {
     renderExerciseOptions();
@@ -443,6 +436,7 @@ function renderHistory() {
 function checkPR(exerciseName, sets) {
     const maxWeightInEntry = Math.max(...sets.map(s => s.weight));
     
+    // Megkeressük a gyakorlat összes korábbi bejegyzését
     const allWeightsForExercise = workoutHistory
         .filter(item => item.exercise === exerciseName)
         .flatMap(item => item.sets.map(s => s.weight));
