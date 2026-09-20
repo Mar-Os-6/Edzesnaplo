@@ -261,7 +261,6 @@ function renderChart() {
     }
 
     const workouts = getWorkoutsFromStorage();
-    // Csoportosítás dátum szerint (az adott napon elért maximum súly)
     const historyMap = {};
     workouts.filter(w => !w.isCardio && w.exercise === selectedEx).forEach(w => {
         const wNum = parseFloat(w.weight) || 0;
