@@ -93,14 +93,21 @@ label {
     color: #aaa;
 }
 
-input {
+/*
+ EGYFORMA MAGASSÁG ÉS KINÉZET MINDEN BEVITELI MEZŐNEK (DÁTUM, SZÖVEG, SZÁM)
+*/
+input, input[type="date"] {
     width: 100%;
-    padding: 12px;
+    height: 46px; /* Rögzített pontos magasság */
+    padding: 0 12px;
     border-radius: 8px;
     border: 1px solid #333;
     background-color: #1e1e1e;
     color: #fff;
-    font-size: 1rem;
+    font-size: 16px; /* A 16px megelőzi, hogy az iPhone automatikusan ránagyítson a mezőre */
+    -webkit-appearance: none; /* Kikapcsolja a Safari egyedi gyári stílusát */
+    appearance: none;
+    box-sizing: border-box;
 }
 
 input:focus {
