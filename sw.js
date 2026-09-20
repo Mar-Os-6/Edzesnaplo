@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edzesnaplo-v3';
+const CACHE_NAME = 'edzesnaplo-v4';
 const ASSETS = [
     './',
     './index.html',
@@ -7,17 +7,12 @@ const ASSETS = [
     './manifest.json'
 ];
 
-// 1. TELEPÍTÉS - Azonnali aktiválás kényszerítése
+// 1. TELEPÍTÉS - Azonnali átvétel kényszerítése
 self.addEventListener('install', (e) => {
-    e.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS);
-        })
-    );
     self.skipWaiting();
 });
 
-// 2. AKTIVÁLÁS - Az összes régi cache kíméletlen törlése és azonnali átvétel
+// 2. AKTIVÁLÁS - Régi cache kíméletlen törlése és regisztráció törlése az Apple Safari miatt
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keys) => {
@@ -27,12 +22,14 @@ self.addEventListener('activate', (e) => {
                 })
             );
         }).then(() => {
+            return self.registration.unregister();
+        }).then(() => {
             return self.clients.claim();
         })
     );
 });
 
-// 3. KÉRÉSEK ELCSÍPÉSE (Network First a frissüléshez)
+// 3. KÉRÉSEK ELCSÍPÉSE - Közvetlen hálózati letöltés kényszerítése cache helyett
 self.addEventListener('fetch', (e) => {
     e.respondWith(
         fetch(e.request)
