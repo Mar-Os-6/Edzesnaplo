@@ -254,22 +254,23 @@ input:focus, select:focus {
     background-color: #2a2a2a;
 }
 
-/* Chipek (Kijelölhető gombok) */
+/* CHIPEK (VISSZAÁLLÍTVA ZÖLD SZÖVEGRE ÉS KÖRVOANALRA) */
 .chip-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 5px;
+    gap: 8px;
+    margin-top: 6px;
     min-height: 35px;
 }
 
 .chip {
-    background-color: #2a2a2a;
-    border: 1px solid #444;
-    color: #ccc;
-    padding: 6px 10px;
-    border-radius: 16px;
-    font-size: 0.8rem;
+    background-color: #122119;
+    border: 1px solid #00e676;
+    color: #00e676;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -277,28 +278,22 @@ input:focus, select:focus {
     user-select: none;
 }
 
-.chip.active {
-    background-color: #1b382b;
-    border-color: #00e676;
-    color: #00e676;
-    font-weight: bold;
-}
-
-.chip.selected-chip {
-    background-color: #00e676;
-    color: #000;
-    font-weight: bold;
-}
-
 .chip:hover {
-    opacity: 0.9;
+    background-color: #1b382b;
+}
+
+.chip.active, .chip.selected-chip {
+    background-color: #00e676;
+    color: #000000;
+    font-weight: bold;
 }
 
 .chip .delete-chip {
     color: #ff5252;
     font-weight: bold;
-    font-size: 0.9rem;
-    padding: 0 2px;
+    font-size: 1rem;
+    margin-left: 4px;
+    cursor: pointer;
 }
 
 .hint {
