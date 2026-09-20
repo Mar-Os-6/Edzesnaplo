@@ -10,7 +10,7 @@
     <div class="container">
         <h1>🏋️‍♂️ Edzésnapló</h1>
 
-        <!-- 1. PIHENŐIDŐ IDŐZÍTŐ (REZGÉSSEL ÉS HANGGAL) -->
+        <!-- 1. PIHENŐIDŐ IDŐZÍTŐ -->
         <div class="timer-card">
             <h3>⏱️ Pihenőidő Stopper</h3>
             <div id="timer-display">01:00</div>
@@ -50,9 +50,7 @@
             <!-- GYORSGYAKORLAT GOMBOK KONTÉNERE -->
             <div class="form-group">
                 <label>Kattints a gyakorlatra (vagy írd be alább):</label>
-                <div id="quick-exercises" class="chip-container">
-                    <!-- A JavaScript ide tölti be a mentett gyakorlatokat -->
-                </div>
+                <div id="quick-exercises" class="chip-container"></div>
             </div>
 
             <div class="form-group">
@@ -61,14 +59,31 @@
                 <small id="history-hint" class="hint"></small>
             </div>
 
-            <div class="form-row">
+            <!-- SÚLYZÓS MEZŐK (ALAPÉRTELMEZETT) -->
+            <div id="resistance-fields" class="form-row">
                 <div class="form-group">
                     <label for="weight">Súly (kg):</label>
-                    <input type="number" id="weight" placeholder="80" step="0.5" required>
+                    <input type="number" id="weight" placeholder="80" step="0.5">
                 </div>
                 <div class="form-group">
                     <label for="reps">Ismétlés:</label>
-                    <input type="number" id="reps" placeholder="10" required>
+                    <input type="number" id="reps" placeholder="10">
+                </div>
+            </div>
+
+            <!-- KARDIÓ MEZŐK (AUTOMATIKUSAN JELENIK MEG KARDIÓNÁL) -->
+            <div id="cardio-fields" class="form-row hidden">
+                <div class="form-group">
+                    <label for="cardio-time">Idő (perc):</label>
+                    <input type="number" id="cardio-time" placeholder="20">
+                </div>
+                <div class="form-group">
+                    <label for="cardio-incline">Dőlésszög / Fokozat:</label>
+                    <input type="text" id="cardio-incline" placeholder="pl. 12% vagy 8. fokozat">
+                </div>
+                <div class="form-group">
+                    <label for="cardio-speed">Sebesség (km/h):</label>
+                    <input type="number" id="cardio-speed" placeholder="5.5" step="0.1">
                 </div>
             </div>
 
@@ -80,13 +95,12 @@
             <button type="submit" id="save-btn">Mentés</button>
         </form>
 
-        <!-- 3. KERESŐ, ELŐZMÉNYEK ÉS EXPORT -->
+        <!-- 3. KERESŐ ÉS ELŐZMÉNYEK -->
         <div class="action-header">
             <h2>Mai és korábbi edzések</h2>
             <button id="export-btn" class="secondary-btn">💾 Adatok letöltése</button>
         </div>
 
-        <!-- GYAKORLAT KERESŐ / SZŰRŐ MEZŐ -->
         <div class="form-group">
             <input type="text" id="search-filter" placeholder="🔍 Keresés gyakorlatra vagy dátumra...">
         </div>
@@ -97,16 +111,14 @@
                     <tr>
                         <th>Dátum</th>
                         <th>Izomcsoport</th>
-                        <th>Gyakorlat (Sorozatszám)</th>
-                        <th>Súly</th>
-                        <th>Ismétlés</th>
+                        <th>Gyakorlat</th>
+                        <th>Súly / Idő</th>
+                        <th>Ismétlés / Részletek</th>
                         <th>Jegyzet</th>
                         <th>Törlés</th>
                     </tr>
                 </thead>
-                <tbody id="workout-list">
-                    <!-- A JavaScript ide szúrja be a sorokat -->
-                </tbody>
+                <tbody id="workout-list"></tbody>
             </table>
         </div>
     </div>
