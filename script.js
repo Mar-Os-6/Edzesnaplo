@@ -25,14 +25,24 @@ const searchFilterInput = document.getElementById('search-filter');
 // SABLON ELEMEK
 const templateSelect = document.getElementById('template-select');
 const startTemplateBtn = document.getElementById('start-template-btn');
+const editTemplateBtn = document.getElementById('edit-template-btn');
 const toggleNewTemplateBtn = document.getElementById('toggle-new-template-btn');
 const deleteTemplateBtn = document.getElementById('delete-template-btn');
+
 const createTemplateBox = document.getElementById('create-template-box');
+const templateFormTitle = document.getElementById('template-form-title');
 const newTemplateNameInput = document.getElementById('new-template-name');
-const newTemplateExercisesInput = document.getElementById('new-template-exercises');
+
+const templateMuscleChips = document.getElementById('template-muscle-chips');
+const templateAvailableExercises = document.getElementById('template-available-exercises');
+const customTemplateExInput = document.getElementById('custom-template-ex-input');
+const addCustomTemplateExBtn = document.getElementById('add-custom-template-ex-btn');
+const templateSelectedExercises = document.getElementById('template-selected-exercises');
+
 const saveNewTemplateBtn = document.getElementById('save-new-template-btn');
 const cancelNewTemplateBtn = document.getElementById('cancel-new-template-btn');
-const activeTemplateBanner = document.getElementById('active-banner') || document.getElementById('active-template-banner');
+
+const activeTemplateBanner = document.getElementById('active-template-banner');
 const activeTemplateInfo = document.getElementById('active-template-info');
 const cancelTemplateBtn = document.getElementById('cancel-template-btn');
 
@@ -52,20 +62,28 @@ const defaultExercises = {
 const defaultTemplates = [
     {
         name: "A nap: Mell - Tricepsz",
+        muscleGroups: ["Mell", "Tricepsz"],
         exercises: ["Fekvenyomás", "Incline Fekvenyomás", "Tárogatás", "Tricepsz letolás csigán"]
     },
     {
         name: "B nap: Hát - Bicepsz",
+        muscleGroups: ["Hát", "Bicepsz"],
         exercises: ["Húzódzkodás", "Mellhez húzás csigán", "Evezés döntött törzzsel", "Bicepsz állva franciarúddal"]
     },
     {
         name: "C nap: Láb - Váll",
+        muscleGroups: ["Láb", "Váll"],
         exercises: ["Guggolás", "Lábnyomás", "Vállból nyomás kézisúlyzóval", "Oldalemelés"]
     }
 ];
 
-// AKTÍV EDZÉSTERV ÁLLAPOT
-let activeSession = null; // { templateName, exercises, currentIndex }
+// SABLON LÉTREHOZÓ / SZERKESZTŐ BELSŐ ÁLLAPOT
+let editingTemplateIndex = null; // null = új, szám = szerkesztés
+let builderSelectedMuscles = [];
+let builderSelectedExercises = [];
+
+// AKTÍV EDZÉSTERV ÁLLAPOT (AMIKOR EDZEL)
+let activeSession = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadWorkouts();
@@ -96,35 +114,183 @@ function loadTemplates() {
     });
 }
 
+// SABLON KÉSZÍTŐ ÉS SZERKESZTŐ NYITÁSA/ZÁRÁSA
 toggleNewTemplateBtn.addEventListener('click', () => {
-    createTemplateBox.classList.toggle('hidden');
+    openTemplateBuilder(null);
+});
+
+editTemplateBtn.addEventListener('click', () => {
+    const val = templateSelect.value;
+    if (val === '') {
+        alert('Kérlek válaszd ki a szerkeszteni kívánt sablont!');
+        return;
+    }
+    openTemplateBuilder(parseInt(val));
 });
 
 cancelNewTemplateBtn.addEventListener('click', () => {
     createTemplateBox.classList.add('hidden');
 });
 
-saveNewTemplateBtn.addEventListener('click', () => {
-    const name = newTemplateNameInput.value.trim();
-    const exString = newTemplateExercisesInput.value.trim();
+function openTemplateBuilder(templateIndex = null) {
+    editingTemplateIndex = templateIndex;
+    const templates = getCustomTemplates();
 
-    if (!name || !exString) {
-        alert('Kérlek add meg a sablon nevét és a gyakorlatokat!');
+    if (templateIndex !== null && templates[templateIndex]) {
+        const t = templates[templateIndex];
+        templateFormTitle.textContent = '✏️ Sablon Szerkesztése';
+        newTemplateNameInput.value = t.name;
+        builderSelectedMuscles = t.muscleGroups ? [...t.muscleGroups] : [];
+        builderSelectedExercises = t.exercises ? [...t.exercises] : [];
+    } else {
+        templateFormTitle.textContent = '✨ Új Sablon Létrehozása';
+        newTemplateNameInput.value = '';
+        builderSelectedMuscles = [];
+        builderSelectedExercises = [];
+    }
+
+    renderTemplateMuscleChips();
+    renderTemplateAvailableExercises();
+    renderTemplateSelectedExercises();
+    createTemplateBox.classList.remove('hidden');
+}
+
+// 1. IZOMCSOPORT CHIPEK KIRAJZOLÁSA
+function renderTemplateMuscleChips() {
+    templateMuscleChips.innerHTML = '';
+    const allGroups = ['Mell', 'Bicepsz', 'Hát', 'Tricepsz', 'Váll', 'Láb', 'Has', 'Kardió'];
+
+    allGroups.forEach(group => {
+        const isSelected = builderSelectedMuscles.includes(group);
+        const chip = document.createElement('div');
+        chip.className = `chip ${isSelected ? 'active' : ''}`;
+        chip.textContent = group;
+        chip.onclick = () => {
+            if (isSelected) {
+                builderSelectedMuscles = builderSelectedMuscles.filter(m => m !== group);
+            } else {
+                builderSelectedMuscles.push(group);
+            }
+            renderTemplateMuscleChips();
+            renderTemplateAvailableExercises();
+        };
+        templateMuscleChips.appendChild(chip);
+    });
+}
+
+// 2. MEGLÉVŐ GYAKORLATOK KIRAJZOLÁSA A KIJELÖLT IZOMCSOPORTOK ALAPJÁN
+function renderTemplateAvailableExercises() {
+    templateAvailableExercises.innerHTML = '';
+    const allExercises = getCustomExercises();
+
+    let available = [];
+
+    if (builderSelectedMuscles.length === 0) {
+        // Ha nincs izomcsoport kijelölve, az összes létező gyakorlatot megmutatjuk
+        for (const group in allExercises) {
+            available = available.concat(allExercises[group]);
+        }
+    } else {
+        // Csak a kijelölt izomcsoportok gyakorlatai
+        builderSelectedMuscles.forEach(group => {
+            if (allExercises[group]) {
+                available = available.concat(allExercises[group]);
+            }
+        });
+    }
+
+    // Duplikációk szűrése
+    available = [...new Set(available)];
+
+    if (available.length === 0) {
+        templateAvailableExercises.innerHTML = '<small style="color:#888;">Nincsenek gyakorlatok ehhez az izomcsoporthoz.</small>';
         return;
     }
 
-    const exArray = exString.split(',').map(s => s.trim()).filter(s => s.length > 0);
-    const templates = getCustomTemplates();
-    templates.push({ name: name, exercises: exArray });
-    saveCustomTemplates(templates);
+    available.forEach(exName => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.textContent = `+ ${exName}`;
+        chip.onclick = () => {
+            builderSelectedExercises.push(exName);
+            renderTemplateSelectedExercises();
+        };
+        templateAvailableExercises.appendChild(chip);
+    });
+}
 
-    newTemplateNameInput.value = '';
-    newTemplateExercisesInput.value = '';
-    createTemplateBox.classList.add('hidden');
-    loadTemplates();
-    alert('✅ Új sablon sikeresen elmentve!');
+// 3. EGYEDI GYAKORLAT HOZZÁADÁSA A SABLONHOZ
+addCustomTemplateExBtn.addEventListener('click', () => {
+    const val = customTemplateExInput.value.trim();
+    if (val) {
+        builderSelectedExercises.push(val);
+        customTemplateExInput.value = '';
+        renderTemplateSelectedExercises();
+    }
 });
 
+// 4. A SABLONBA BEVÁLOGATOTT GYAKORLATOK MEGJELENÍTÉSE
+function renderTemplateSelectedExercises() {
+    templateSelectedExercises.innerHTML = '';
+
+    if (builderSelectedExercises.length === 0) {
+        templateSelectedExercises.innerHTML = '<small style="color:#888;">Még nem választottál ki gyakorlatot.</small>';
+        return;
+    }
+
+    builderSelectedExercises.forEach((exName, index) => {
+        const chip = document.createElement('div');
+        chip.className = 'chip selected-chip';
+        chip.innerHTML = `
+            <span>${index + 1}. ${exName}</span>
+            <span class="delete-chip" onclick="removeExerciseFromBuilder(${index})">×</span>
+        `;
+        templateSelectedExercises.appendChild(chip);
+    });
+}
+
+function removeExerciseFromBuilder(index) {
+    builderSelectedExercises.splice(index, 1);
+    renderTemplateSelectedExercises();
+}
+
+// SABLON MENTÉSE
+saveNewTemplateBtn.addEventListener('click', () => {
+    const name = newTemplateNameInput.value.trim();
+
+    if (!name) {
+        alert('Kérlek add meg a sablon nevét!');
+        return;
+    }
+
+    if (builderSelectedExercises.length === 0) {
+        alert('Kérlek válassz ki legalább 1 gyakorlatot a sablonhoz!');
+        return;
+    }
+
+    const templates = getCustomTemplates();
+    const templateData = {
+        name: name,
+        muscleGroups: builderSelectedMuscles,
+        exercises: builderSelectedExercises
+    };
+
+    if (editingTemplateIndex !== null) {
+        // Szerkesztés felülírása
+        templates[editingTemplateIndex] = templateData;
+    } else {
+        // Új hozzáadása
+        templates.push(templateData);
+    }
+
+    saveCustomTemplates(templates);
+
+    createTemplateBox.classList.add('hidden');
+    loadTemplates();
+    alert('✅ Sablon sikeresen elmentve!');
+});
+
+// SABLON TÖRLÉSE
 deleteTemplateBtn.addEventListener('click', () => {
     const val = templateSelect.value;
     if (val === '') {
@@ -140,7 +306,7 @@ deleteTemplateBtn.addEventListener('click', () => {
     }
 });
 
-// SABLON INDÍTÁSA
+// SABLON INDÍTÁSA EDZÉSHEZ
 startTemplateBtn.addEventListener('click', () => {
     const val = templateSelect.value;
     if (val === '') {
@@ -188,7 +354,6 @@ function updateActiveSessionUI() {
     activeTemplateInfo.textContent = `📋 ${activeSession.templateName} (${currentNum}/${total}: ${currentEx})`;
     activeTemplateBanner.classList.remove('hidden');
 
-    // Automatikusan kitöltjük a gyakorlat nevét és kitaláljuk az izomcsoportját
     exerciseInput.value = currentEx;
     autoDetectMuscleGroup(currentEx);
     checkPreviousWeight();
@@ -412,7 +577,6 @@ form.addEventListener('submit', function(e) {
 
     loadWorkouts();
 
-    // HA AKTÍV EDZÉSTERV FUT: LÉPTETÜNK A KÖVETKEZŐ GYAKORLATRA!
     if (activeSession) {
         activeSession.currentIndex++;
         updateActiveSessionUI();
