@@ -3,172 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profi Edzésnapló</title>
-    
-    <!-- PWA BEÁLLÍTÁSOK -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00e676">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Edzésnapló">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2548/2548537.png">
-
+    <title>Edzés Napló</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🏋️‍♂️ Edzésnapló</h1>
+        <h1>Edzés Napló</h1>
 
-        <!-- 1. PIHENŐIDŐ IDŐZÍTŐ -->
-        <div class="timer-card">
-            <h3>⏱️ Pihenőidő Stopper</h3>
-            <div id="timer-display">01:00</div>
-            <div class="timer-buttons">
-                <button type="button" class="timer-btn" onclick="setTimer(60)">60 mp</button>
-                <button type="button" class="timer-btn" onclick="setTimer(90)">90 mp</button>
-                <button type="button" class="timer-btn" onclick="setTimer(120)">120 mp</button>
-            </div>
-            <div class="timer-controls">
-                <button type="button" id="start-timer-btn">Start / Szünet</button>
-                <button type="button" id="reset-timer-btn">Visszaállítás</button>
-            </div>
-        </div>
-
-        <!-- 2. EDZÉSTERV SABLONOK KÁRTYA -->
-        <div class="template-card">
-            <h3>📋 Edzésterv Sablonok</h3>
-            
-            <!-- AKTÍV SABLON ÁLLAPOTJELZŐ (HA FUT EGY SABLON) -->
-            <div id="active-template-banner" class="active-banner hidden">
-                <span id="active-template-info"></span>
-                <button type="button" id="cancel-template-btn" class="close-btn">✕ Megszakítás</button>
-            </div>
-
-            <!-- SABLON VÁLASZTÓ ÉS KEZELŐ GOMBOK -->
-            <div id="template-select-box" class="form-group">
-                <select id="template-select">
-                    <option value="">-- Válassz edzéstervet --</option>
-                </select>
-                <div class="btn-group" style="margin-top: 8px;">
-                    <button type="button" id="start-template-btn" class="secondary-btn">🚀 Edzés indítása</button>
-                    <button type="button" id="edit-template-btn" class="secondary-btn">✏️ Szerkesztés</button>
-                    <button type="button" id="toggle-new-template-btn" class="secondary-btn">+ Új Sablon</button>
-                    <button type="button" id="delete-template-btn" class="secondary-btn danger-text">🗑️ Törlés</button>
-                </div>
-            </div>
-
-            <!-- ÚJ / SZERKESZTETT SABLON LÉTREHOZÁSA DOBOZ -->
-            <div id="create-template-box" class="create-box hidden">
-                <h4 id="template-form-title">Új Sablon Létrehozása</h4>
-                
-                <div class="form-group">
-                    <label for="new-template-name">Sablon neve:</label>
-                    <input type="text" id="new-template-name" placeholder="pl. A nap: Mell-Tricepsz">
+        <!-- ÖSSZECSUKHATÓ IDŐZÍTŐ ÉS STOPPER -->
+        <details class="timer-accordion">
+            <summary class="timer-summary">⏱️ Időzítő & Stopperóra</summary>
+            <div class="timer-content">
+                <!-- Módválasztó fülek -->
+                <div class="timer-tabs">
+                    <button type="button" id="tab-stopwatch" class="tab-btn active" onclick="switchTimerTab('stopwatch')">Stopper (Felfelé)</button>
+                    <button type="button" id="tab-countdown" class="tab-btn" onclick="switchTimerTab('countdown')">Időzítő (Lefelé)</button>
                 </div>
 
-                <div class="form-group">
-                    <label>Érintett izomcsoportok (kattints a kijelöléshez):</label>
-                    <div id="template-muscle-chips" class="chip-container"></div>
-                </div>
-
-                <div class="form-group">
-                    <label>Meglévő gyakorlatok (kattints rá a hozzáadáshoz):</label>
-                    <div id="template-available-exercises" class="chip-container"></div>
-                </div>
-
-                <div class="form-group">
-                    <label>Egyedi gyakorlat beírása (ha nincs a listában):</label>
-                    <div class="input-with-btn">
-                        <input type="text" id="custom-template-ex-input" placeholder="pl. Csigás keresztezés">
-                        <button type="button" id="add-custom-template-ex-btn" class="secondary-btn">+ Hozzáad</button>
+                <!-- 1. STOPPERÓRA -->
+                <div id="stopwatch-view" class="timer-view">
+                    <div id="stopwatch-display" class="timer-display">00:00:00</div>
+                    <div class="timer-controls">
+                        <button type="button" id="sw-start-btn" class="primary-timer-btn" onclick="toggleStopwatch()">Indítás</button>
+                        <button type="button" class="secondary-timer-btn" onclick="resetStopwatch()">Nullázás</button>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>A sablonba kiválasztott gyakorlatok (sorrendben):</label>
-                    <div id="template-selected-exercises" class="chip-container selected-ex-box"></div>
-                </div>
+                <!-- 2. VISSZASZÁMLÁLÓ IDŐZÍTŐ -->
+                <div id="countdown-view" class="timer-view hidden">
+                    <div id="countdown-display" class="timer-display">01:00</div>
+                    
+                    <!-- Egyéni idő megadása -->
+                    <div class="countdown-inputs">
+                        <div class="input-group-time">
+                            <input type="number" id="cd-minutes" value="1" min="0" max="999">
+                            <label>perc</label>
+                        </div>
+                        <div class="input-group-time">
+                            <input type="number" id="cd-seconds" value="0" min="0" max="59">
+                            <label>másodperc</label>
+                        </div>
+                    </div>
 
-                <div class="btn-group" style="margin-top: 15px;">
-                    <button type="button" id="save-new-template-btn" class="secondary-btn">💾 Sablon Mentése</button>
-                    <button type="button" id="cancel-new-template-btn" class="secondary-btn">Mégse</button>
+                    <!-- Gyorsgombok -->
+                    <div class="preset-btns">
+                        <button type="button" onclick="setCountdownPreset(30)">30s</button>
+                        <button type="button" onclick="setCountdownPreset(60)">1p</button>
+                        <button type="button" onclick="setCountdownPreset(120)">2p</button>
+                        <button type="button" onclick="setCountdownPreset(300)">5p</button>
+                    </div>
+
+                    <div class="timer-controls">
+                        <button type="button" id="cd-start-btn" class="primary-timer-btn" onclick="toggleCountdown()">Indítás</button>
+                        <button type="button" class="secondary-timer-btn" onclick="resetCountdown()">Nullázás</button>
+                    </div>
                 </div>
+            </div>
+        </details>
+
+        <!-- SABLON KÁRTYA -->
+        <div class="template-card">
+            <h3>🏋️ Edzéssablonok</h3>
+            <div id="active-template-banner" class="active-banner hidden">
+                <span id="active-template-name"></span>
+                <button type="button" class="close-btn" onclick="clearActiveTemplate()">Kilépés</button>
+            </div>
+            <div class="form-group">
+                <label for="template-select">Sablon betöltése:</label>
+                <select id="template-select" onchange="loadSelectedTemplate()">
+                    <option value="">-- Válassz sablont --</option>
+                </select>
+            </div>
+            <button type="button" class="secondary-btn-full" onclick="toggleCreateTemplateBox()">+ Új sablon létrehozása</button>
+            
+            <div id="create-template-box" class="create-box hidden">
+                <h4>Új sablon mentése</h4>
+                <div class="form-group">
+                    <input type="text" id="new-template-name" placeholder="Sablon neve (pl. Mell-Bicepsz)">
+                </div>
+                <label>Gyakorlatok kiválasztása:</label>
+                <div id="template-exercise-chips" class="chip-container"></div>
+                <div class="selected-ex-box" id="selected-template-exercises-text">Nincs kiválasztva gyakorlat.</div>
+                <button type="button" id="save-template-btn" class="primary-timer-btn" style="width: 100%; margin-top: 10px;" onclick="saveNewTemplate()">Sablon Mentése</button>
             </div>
         </div>
 
-        <!-- 3. EDZÉSRÖGZÍTŐ ŰRLAP -->
+        <!-- EDZÉS RÖGZÍTÉSE ÚRLAP -->
         <form id="workout-form">
-            <div class="form-group">
-                <label for="workout-date">Dátum:</label>
-                <input type="date" id="workout-date" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date">Dátum:</label>
+                    <input type="date" id="date" required>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="muscle-group">Izomcsoport:</label>
-                <select id="muscle-group">
+                <label for="workout-type">Edzés típusa / Izomcsoport:</label>
+                <select id="workout-type" onchange="filterExercisesByCategory()">
+                    <option value="Összes">Összes</option>
                     <option value="Mell">Mell</option>
-                    <option value="Bicepsz">Bicepsz</option>
                     <option value="Hát">Hát</option>
-                    <option value="Tricepsz">Tricepsz</option>
-                    <option value="Váll">Váll</option>
                     <option value="Láb">Láb</option>
+                    <option value="Váll">Váll</option>
+                    <option value="Kar">Kar</option>
                     <option value="Has">Has</option>
                     <option value="Kardió">Kardió</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Kattints a gyakorlatra (vagy írd be alább):</label>
-                <div id="quick-exercises" class="chip-container"></div>
+                <label for="exercise-select">Gyakorlat kiválasztása:</label>
+                <select id="exercise-select">
+                    <option value="">-- Válassz gyakorlatot --</option>
+                </select>
             </div>
 
+            <!-- Gyakorlat gombok (Chipek) -->
             <div class="form-group">
-                <label for="exercise">Gyakorlat neve:</label>
-                <input type="text" id="exercise" placeholder="pl. Fekvenyomás" required autocomplete="off">
-                <small id="history-hint" class="hint"></small>
+                <label>Gyorsválasztó csempék:</label>
+                <div id="exercise-chips" class="chip-container"></div>
             </div>
 
-            <div id="resistance-fields">
-                <label class="section-label">Sorozatok:</label>
-                <div id="sets-container"></div>
-                <button type="button" id="add-set-btn" class="secondary-btn-full">+ SOROZAT HOZZÁADÁSA</button>
-            </div>
-
-            <div id="cardio-fields" class="form-row hidden">
-                <div class="form-group">
-                    <label for="cardio-time">Idő (perc):</label>
-                    <input type="number" id="cardio-time" placeholder="20">
-                </div>
-                <div class="form-group">
-                    <label for="cardio-incline">Dőlésszög / Fokozat:</label>
-                    <input type="text" id="cardio-incline" placeholder="pl. 12% vagy 8. fokozat">
-                </div>
-                <div class="form-group">
-                    <label for="cardio-speed">Sebesség (km/h):</label>
-                    <input type="number" id="cardio-speed" placeholder="5.5" step="0.1">
+            <!-- Új gyakorlat hozzáadása -->
+            <div class="form-group">
+                <div class="input-with-btn">
+                    <input type="text" id="custom-exercise-input" placeholder="Új gyakorlat neve">
+                    <button type="button" class="secondary-timer-btn" onclick="addNewCustomExercise()">Hozzáadás</button>
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 15px;">
-                <label for="note">Megjegyzés:</label>
-                <input type="text" id="note" placeholder="Opcionális megjegyzés">
+            <span class="section-label">Sorozatok</span>
+            <div id="sets-container">
+                <!-- Dinamikusan generált sorozatok -->
             </div>
 
-            <button type="submit" id="save-btn">Mentés</button>
+            <button type="button" class="secondary-btn-full" onclick="addSetRow()">+ Új sorozat hozzáadása</button>
+
+            <button type="submit" id="save-btn">Edzés Mentése</button>
         </form>
 
-        <!-- 4. KERESŐ ÉS ELŐZMÉNYEK -->
+        <!-- TÖRTÉNET ÉS TÁBLÁZAT -->
         <div class="action-header">
-            <h2>Mai és korábbi edzések</h2>
+            <h2>Előző edzések</h2>
             <div class="btn-group">
-                <button id="import-btn" class="secondary-btn">📥 Adatok feltöltése</button>
-                <input type="file" id="import-file" accept=".json" style="display: none;">
-                <button id="export-btn" class="secondary-btn">💾 Adatok letöltése</button>
+                <button type="button" class="secondary-btn" onclick="exportData()">Exportálás</button>
+                <button type="button" class="secondary-btn" onclick="triggerImport()">Importálás</button>
+                <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
             </div>
-        </div>
-
-        <div class="form-group">
-            <input type="text" id="search-filter" placeholder="🔍 Keresés gyakorlatra vagy dátumra...">
         </div>
 
         <div class="table-wrapper">
@@ -176,15 +157,14 @@
                 <thead>
                     <tr>
                         <th>Dátum</th>
-                        <th>Izomcsoport</th>
                         <th>Gyakorlat</th>
-                        <th>Súly / Idő</th>
-                        <th>Ismétlés / Részletek</th>
-                        <th>Jegyzet</th>
-                        <th>Törlés</th>
+                        <th>Sorozatok (kg x ismétlés)</th>
+                        <th>Műveletek</th>
                     </tr>
                 </thead>
-                <tbody id="workout-list"></tbody>
+                <tbody id="workout-history-body">
+                    <!-- Dinamikus edzés előzmények -->
+                </tbody>
             </table>
         </div>
     </div>
