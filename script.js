@@ -19,6 +19,7 @@ let editingIndex = null;
 
 // --- INICIALIZÁLÁS ---
 document.addEventListener("DOMContentLoaded", () => {
+    // Mai dátum beállítása alapértelmezetten
     const dateInput = document.getElementById('date');
     if (dateInput) {
         dateInput.value = new Date().toISOString().split('T')[0];
@@ -29,10 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTemplateSelect();
     renderHistory();
 
+    // Egy alapértelmezett sorozat hozzáadása
     if (document.getElementById('sets-container').children.length === 0) {
         addSetRow();
     }
 
+    // Időzítő inputok figyelése
     document.getElementById('cd-minutes')?.addEventListener('input', updateCountdownFromInputs);
     document.getElementById('cd-seconds')?.addEventListener('input', updateCountdownFromInputs);
 });
@@ -47,6 +50,7 @@ function switchTimerTab(tab) {
     document.getElementById('countdown-view').classList.toggle('hidden', tab !== 'countdown');
 }
 
+// 1. STOPPER (Felfelé)
 let swInterval = null;
 let swSeconds = 0;
 
@@ -56,16 +60,14 @@ function toggleStopwatch() {
         clearInterval(swInterval);
         swInterval = null;
         btn.textContent = 'Folytatás';
-        btn.style.backgroundColor = 'var(--accent-color)';
-        btn.style.color = '#000';
+        btn.style.backgroundColor = '#00e676';
     } else {
         swInterval = setInterval(() => {
             swSeconds++;
             updateStopwatchDisplay();
         }, 1000);
         btn.textContent = 'Szünet';
-        btn.style.backgroundColor = 'var(--danger-color)';
-        btn.style.color = '#fff';
+        btn.style.backgroundColor = '#ff5252';
     }
 }
 
@@ -76,8 +78,7 @@ function resetStopwatch() {
     updateStopwatchDisplay();
     const btn = document.getElementById('sw-start-btn');
     btn.textContent = 'Indítás';
-    btn.style.backgroundColor = 'var(--accent-color)';
-    btn.style.color = '#000';
+    btn.style.backgroundColor = '#00e676';
 }
 
 function updateStopwatchDisplay() {
@@ -87,6 +88,7 @@ function updateStopwatchDisplay() {
     document.getElementById('stopwatch-display').textContent = `${hrs}:${mins}:${secs}`;
 }
 
+// 2. VISSZASZÁMLÁLÓ (Lefelé)
 let cdInterval = null;
 let cdTotalSeconds = 60;
 
@@ -113,8 +115,7 @@ function toggleCountdown() {
         clearInterval(cdInterval);
         cdInterval = null;
         btn.textContent = 'Folytatás';
-        btn.style.backgroundColor = 'var(--accent-color)';
-        btn.style.color = '#000';
+        btn.style.backgroundColor = '#00e676';
     } else {
         if (cdTotalSeconds <= 0) updateCountdownFromInputs();
         if (cdTotalSeconds <= 0) return;
@@ -130,15 +131,13 @@ function toggleCountdown() {
                 clearInterval(cdInterval);
                 cdInterval = null;
                 btn.textContent = 'Indítás';
-                btn.style.backgroundColor = 'var(--accent-color)';
-                btn.style.color = '#000';
+                btn.style.backgroundColor = '#00e676';
                 alert('⏱️ Letelt az idő!');
             }
         }, 1000);
 
         btn.textContent = 'Szünet';
-        btn.style.backgroundColor = 'var(--danger-color)';
-        btn.style.color = '#fff';
+        btn.style.backgroundColor = '#ff5252';
     }
 }
 
@@ -148,11 +147,10 @@ function resetCountdown() {
     updateCountdownFromInputs();
     const btn = document.getElementById('cd-start-btn');
     btn.textContent = 'Indítás';
-    btn.style.backgroundColor = 'var(--accent-color)';
-    btn.style.color = '#000';
+    btn.style.backgroundColor = '#00e676';
 }
 
-// --- GYAKORLATOK SZŰRÉSE ÉS CSEMPÉK ---
+// --- GYAKORLATOK KELÉS ÉS CSEMPÉK (CHIPEK) ---
 
 function filterExercisesByCategory() {
     renderExerciseOptions();
@@ -239,7 +237,7 @@ function deleteCustomExercise(name) {
     }
 }
 
-// --- SOROZATOK KEZELÉSE (Javítva: Törlés gomb rejtése 1 sorozatnál) ---
+// --- SOROZATOK KEZELÉSE ---
 
 function addSetRow(weight = '', reps = '') {
     const container = document.getElementById('sets-container');
@@ -263,6 +261,8 @@ function removeSetRow(btn) {
     if (container.children.length > 1) {
         btn.closest('.set-row').remove();
         updateSetNumbers();
+    } else {
+        alert('Legalább egy sorozatnak maradnia kell!');
     }
 }
 
@@ -270,42 +270,24 @@ function updateSetNumbers() {
     const rows = document.querySelectorAll('.set-row');
     rows.forEach((row, idx) => {
         row.querySelector('.set-number').textContent = `${idx + 1}.`;
-        const removeBtn = row.querySelector('.remove-set-btn');
-        if (removeBtn) {
-            // Ha csak 1 sorozat van, elrejtjük az 'x' gombot
-            if (rows.length === 1) {
-                removeBtn.style.display = 'none';
-            } else {
-                removeBtn.style.display = 'flex';
-            }
-        }
     });
 }
 
-// --- SABLONOK KEZELÉSE (Javítva: Szűrő támogatása & Mégse gomb) ---
+// --- SABLONOK KEZELÉSE ---
 
 function toggleCreateTemplateBox() {
     const box = document.getElementById('create-template-box');
     box.classList.toggle('hidden');
     if (!box.classList.contains('hidden')) {
         renderTemplateChips();
-    } else {
-        document.getElementById('new-template-name').value = '';
-        selectedTemplateExercises = [];
-        document.getElementById('selected-template-exercises-text').textContent = 'Nincs kiválasztva gyakorlat.';
     }
 }
 
 function renderTemplateChips() {
     const container = document.getElementById('template-exercise-chips');
-    const catFilter = document.getElementById('template-category-filter') ? document.getElementById('template-category-filter').value : "Összes";
     container.innerHTML = '';
 
-    const filtered = catFilter === "Összes" 
-        ? exercises 
-        : exercises.filter(ex => ex.category === catFilter);
-
-    filtered.forEach(ex => {
+    exercises.forEach(ex => {
         const chip = document.createElement('div');
         chip.className = 'chip';
         if (selectedTemplateExercises.includes(ex.name)) {
@@ -347,6 +329,8 @@ function saveNewTemplate() {
     workoutTemplates.push({ name, exercises: [...selectedTemplateExercises] });
     localStorage.setItem('workoutTemplates', JSON.stringify(workoutTemplates));
 
+    nameInput.value = '';
+    selectedTemplateExercises = [];
     toggleCreateTemplateBox();
     renderTemplateSelect();
 }
@@ -412,6 +396,7 @@ document.getElementById('workout-form').addEventListener('submit', (e) => {
     localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
     renderHistory();
 
+    // Űrlap alaphelyzetbe állítása
     document.getElementById('sets-container').innerHTML = '';
     addSetRow();
     document.getElementById('exercise-select').value = '';
@@ -425,7 +410,10 @@ function renderHistory() {
 
     workoutHistory.forEach((entry, idx) => {
         const tr = document.createElement('tr');
+
+        // PR ellenőrzés (legnagyobb súly a gyakorlatnál)
         const isPR = checkPR(entry.exercise, entry.sets);
+
         const setsFormatted = entry.sets.map(s => `${s.weight}kg × ${s.reps}`).join('<br>');
 
         tr.innerHTML = `
@@ -448,6 +436,7 @@ function renderHistory() {
 function checkPR(exerciseName, sets) {
     const maxWeightInEntry = Math.max(...sets.map(s => s.weight));
     
+    // Megkeressük a gyakorlat összes korábbi bejegyzését
     const allWeightsForExercise = workoutHistory
         .filter(item => item.exercise === exerciseName)
         .flatMap(item => item.sets.map(s => s.weight));
