@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edzesnaplo-auto';
+const CACHE_NAME = 'edzesnaplo-v3';
 const ASSETS = [
     './',
     './index.html',
@@ -7,7 +7,7 @@ const ASSETS = [
     './manifest.json'
 ];
 
-// 1. TELEPÍTÉS
+// 1. TELEPÍTÉS - Azonnali aktiválás kényszerítése
 self.addEventListener('install', (e) => {
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -17,25 +17,23 @@ self.addEventListener('install', (e) => {
     self.skipWaiting();
 });
 
-// 2. AKTIVÁLÁS - Régi cache azonnali törlése
+// 2. AKTIVÁLÁS - Az összes régi cache kíméletlen törlése és azonnali átvétel
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
                 keys.map((key) => {
-                    if (key !== CACHE_NAME) {
-                        return caches.delete(key);
-                    }
+                    return caches.delete(key);
                 })
             );
+        }).then(() => {
+            return self.clients.claim();
         })
     );
-    self.clients.claim();
 });
 
 // 3. KÉRÉSEK ELCSÍPÉSE (Network First a frissüléshez)
 self.addEventListener('fetch', (e) => {
-    // Ha az sw.js-t vagy a főoldalt kéri, azt mindig a hálózatról próbáljuk legelőször
     e.respondWith(
         fetch(e.request)
             .then((networkResponse) => {
