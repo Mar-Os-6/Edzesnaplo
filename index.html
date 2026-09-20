@@ -34,7 +34,46 @@
             </div>
         </div>
 
-        <!-- 2. EDZÉSRÖGZÍTŐ ŰRLAP -->
+        <!-- 2. EDZÉSTERV SABLONOK KÁRTYA -->
+        <div class="template-card">
+            <h3>📋 Edzésterv Sablonok</h3>
+            
+            <!-- AKTÍV SABLON ÁLLAPOTJELZŐ (HA FUT EGY SABLON) -->
+            <div id="active-template-banner" class="active-banner hidden">
+                <span id="active-template-info"></span>
+                <button type="button" id="cancel-template-btn" class="close-btn">✕ Megszakítás</button>
+            </div>
+
+            <!-- SABLON VÁLASZTÓ -->
+            <div id="template-select-box" class="form-group">
+                <select id="template-select">
+                    <option value="">-- Válassz edzéstervet --</option>
+                </select>
+                <div class="btn-group" style="margin-top: 8px;">
+                    <button type="button" id="start-template-btn" class="secondary-btn">🚀 Edzés indítása</button>
+                    <button type="button" id="toggle-new-template-btn" class="secondary-btn">+ Új Sablon</button>
+                    <button type="button" id="delete-template-btn" class="secondary-btn danger-text">🗑️ Törlés</button>
+                </div>
+            </div>
+
+            <!-- ÚJ SABLON LÉTREHOZÁSA DOBOZ (REJTETT) -->
+            <div id="create-template-box" class="create-box hidden">
+                <h4>Új Sablon Létrehozása</h4>
+                <div class="form-group">
+                    <input type="text" id="new-template-name" placeholder="Sablon neve (pl. A nap: Mell-Tricepsz)">
+                </div>
+                <div class="form-group">
+                    <label>Gyakorlatok (vesszővel elválasztva):</label>
+                    <input type="text" id="new-template-exercises" placeholder="pl. Fekvenyomás, Incline Fekvenyomás, Tricepsz letolás">
+                </div>
+                <div class="btn-group">
+                    <button type="button" id="save-new-template-btn" class="secondary-btn">💾 Sablon Mentése</button>
+                    <button type="button" id="cancel-new-template-btn" class="secondary-btn">Mégse</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. EDZÉSRÖGZÍTŐ ŰRLAP -->
         <form id="workout-form">
             <div class="form-group">
                 <label for="workout-date">Dátum:</label>
@@ -95,7 +134,7 @@
             <button type="submit" id="save-btn">Mentés</button>
         </form>
 
-        <!-- 3. KERESŐ ÉS ELŐZMÉNYEK -->
+        <!-- 4. KERESŐ ÉS ELŐZMÉNYEK -->
         <div class="action-header">
             <h2>Mai és korábbi edzések</h2>
             <div class="btn-group">
