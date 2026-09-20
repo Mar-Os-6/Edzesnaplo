@@ -26,8 +26,177 @@ h2 {
     font-size: 1.1rem;
 }
 
-/* Időzítő és Sablon kártyák stílusa */
-.timer-card, .template-card {
+/* ÖSSZECSUKHATÓ KÁRTYA STÍLUS (STOPPER/IDŐZÍTŐ) */
+.timer-accordion {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.timer-summary {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #00e676;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #252525;
+    transition: background-color 0.2s ease;
+}
+
+.timer-summary:hover {
+    background-color: #2a2a2a;
+}
+
+.timer-summary::-webkit-details-marker {
+    display: none;
+}
+
+.chevron {
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+    color: #aaa;
+}
+
+.timer-accordion[open] .chevron {
+    transform: rotate(180deg);
+    color: #00e676;
+}
+
+.timer-content {
+    padding: 15px;
+    text-align: center;
+}
+
+/* FÜLEK */
+.timer-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    background-color: #121212;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 8px;
+    background-color: transparent;
+    border: none;
+    color: #aaa;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background-color: #2a2a2a;
+    color: #00e676;
+}
+
+/* KIJELZŐ ÉS VEZÉRLŐK */
+.timer-display {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #00e676;
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 2px;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.primary-timer-btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    background-color: #00e676;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.secondary-timer-btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background-color: #2a2a2a;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* IDŐZÍTŐ BEMENETEK ÉS GYORSGOMBOK */
+.countdown-inputs {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.input-group-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.input-group-time input {
+    width: 65px;
+    height: 40px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.input-group-time label {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin: 0;
+}
+
+.preset-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.preset-btns button {
+    padding: 6px 12px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #ccc;
+    border-radius: 16px;
+    font-size: 0.78rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preset-btns button:hover {
+    color: #00e676;
+    border-color: #00e676;
+}
+
+/* Sablon kártyák stílusa */
+.template-card {
     background-color: #1e1e1e;
     border: 1px solid #333;
     border-radius: 12px;
@@ -36,40 +205,10 @@ h2 {
     margin-bottom: 20px;
 }
 
-.timer-card h3, .template-card h3 {
+.template-card h3 {
     font-size: 1rem;
     color: #aaa;
     margin-bottom: 8px;
-}
-
-#timer-display {
-    font-size: 2.2rem;
-    font-weight: bold;
-    color: #00e676;
-    margin: 8px 0;
-}
-
-.timer-buttons, .timer-controls {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 8px;
-}
-
-.timer-btn, .timer-controls button {
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: none;
-    background-color: #2a2a2a;
-    color: white;
-    font-size: 0.85rem;
-    cursor: pointer;
-}
-
-.timer-controls #start-timer-btn {
-    background-color: #00e676;
-    color: black;
-    font-weight: bold;
 }
 
 /* Sablon kártya egyedi elemei */
