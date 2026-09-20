@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetSetRows();
 });
 
-// DINAMIKUS SOROZAT KEZELÉS
+// DINAMIKUS SOROZAT KEZELÉS A FORM-BAN
 addSetBtn.addEventListener('click', () => {
     addSetRow();
 });
@@ -201,7 +201,6 @@ function checkPreviousWeight() {
 form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const workouts = getWorkoutsFromStorage();
     const currentDate = dateInput.value;
     const currentMuscleGroup = muscleGroupSelect.value;
     const currentExercise = exerciseInput.value.trim();
@@ -219,13 +218,9 @@ form.addEventListener('submit', function(e) {
             speed: cardioSpeedInput.value,
             note: noteInput.value.trim()
         };
-        addWorkoutToTable(workout);
         saveWorkoutToStorage(workout);
     } else {
         const rows = setsContainer.querySelectorAll('.set-row');
-        const existingSets = workouts.filter(w => w.date === currentDate && w.exercise.toLowerCase() === currentExercise.toLowerCase());
-        let startSetNum = existingSets.length + 1;
-        let addedCount = 0;
 
         rows.forEach((row, index) => {
             const weightVal = row.querySelector('.set-weight').value;
@@ -238,14 +233,11 @@ form.addEventListener('submit', function(e) {
                     muscleGroup: currentMuscleGroup,
                     exercise: currentExercise,
                     isCardio: false,
-                    setNumber: startSetNum + addedCount,
                     weight: weightVal || '0',
                     reps: repsVal || '0',
                     note: noteInput.value.trim()
                 };
-                addWorkoutToTable(workout);
                 saveWorkoutToStorage(workout);
-                addedCount++;
             }
         });
     }
@@ -260,10 +252,13 @@ form.addEventListener('submit', function(e) {
     noteInput.value = '';
     historyHint.textContent = '';
     resetSetRows();
+
+    // Táblázat újratöltése a frissített sorszámokkal és sorozatszámítással
+    loadWorkouts();
 });
 
 // 4. MEGJELENÍTÉS A TÁBLÁZATBAN
-function addWorkoutToTable(workout) {
+function addWorkoutToTable(workout, totalSetsCount, currentSetNum) {
     const tr = document.createElement('tr');
     tr.setAttribute('data-id', workout.id);
 
@@ -278,7 +273,13 @@ function addWorkoutToTable(workout) {
         col5 = details.join(' | ') || '-';
     } else {
         col4 = `${workout.weight} kg`;
-        col5 = `${workout.reps}x <small>(${workout.setNumber || 1}. soroz)</small>`;
+        
+        // Csak akkor írjuk ki a (X. sorozat) szöveget, ha 1-nél több sorozat van az adott napon!
+        if (totalSetsCount > 1) {
+            col5 = `${workout.reps}x <small>(${currentSetNum}. sorozat)</small>`;
+        } else {
+            col5 = `${workout.reps}x`;
+        }
     }
 
     tr.innerHTML = `
@@ -294,7 +295,7 @@ function addWorkoutToTable(workout) {
     workoutList.insertBefore(tr, workoutList.firstChild);
 }
 
-// TÁROLÁS, EXPORT, SZŰRŐ ÉS STOPPER LOGIKA
+// TÁROLÁS, BETÖLTÉS, TÖRLES, EXPORT ÉS STOPPER LOGIKA
 function saveWorkoutToStorage(workout) {
     let workouts = getWorkoutsFromStorage();
     workouts.push(workout);
@@ -306,17 +307,43 @@ function getWorkoutsFromStorage() {
 }
 
 function loadWorkouts() {
+    workoutList.innerHTML = '';
     const workouts = getWorkoutsFromStorage();
-    workouts.forEach(workout => addWorkoutToTable(workout));
+
+    // Megszámoljuk, hogy az egyes (dátum + gyakorlat) párosokból hány sorozat létezik
+    const setCounts = {};
+    workouts.forEach(w => {
+        if (!w.isCardio) {
+            const key = `${w.date}_${w.exercise.toLowerCase()}`;
+            setCounts[key] = (setCounts[key] || 0) + 1;
+        }
+    });
+
+    // Nyomon követjük az aktuális sorozatszámot (1., 2., 3...)
+    const setIndexes = {};
+
+    workouts.forEach(workout => {
+        let totalSets = 0;
+        let currentSetNum = 1;
+
+        if (!workout.isCardio) {
+            const key = `${workout.date}_${workout.exercise.toLowerCase()}`;
+            totalSets = setCounts[key] || 0;
+            setIndexes[key] = (setIndexes[key] || 0) + 1;
+            currentSetNum = setIndexes[key];
+        }
+
+        addWorkoutToTable(workout, totalSets, currentSetNum);
+    });
 }
 
 function deleteWorkout(id) {
-    const row = document.querySelector(`tr[data-id="${id}"]`);
-    if (row) row.remove();
-
     let workouts = getWorkoutsFromStorage();
     workouts = workouts.filter(w => w.id !== id);
     localStorage.setItem('workouts', JSON.stringify(workouts));
+    
+    // Törlés után újratöltjük a táblázatot, hogy a megmaradt sorozatok automatikusan újraszámozódjanak
+    loadWorkouts();
 }
 
 exportBtn.addEventListener('click', function() {
