@@ -7,11 +7,9 @@ const exerciseInput = document.getElementById('exercise');
 
 // SÚLYZÓS ÉS KARDIÓ CONTAINER-EK
 const resistanceFields = document.getElementById('resistance-fields');
+const setsContainer = document.getElementById('sets-container');
+const addSetBtn = document.getElementById('add-set-btn');
 const cardioFields = document.getElementById('cardio-fields');
-
-// SÚLYZÓS INPUTOK
-const weightInput = document.getElementById('weight');
-const repsInput = document.getElementById('reps');
 
 // KARDIÓ INPUTOK
 const cardioTimeInput = document.getElementById('cardio-time');
@@ -44,14 +42,65 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWorkouts();
     renderQuickExercises();
     handleMuscleGroupChange();
+    resetSetRows();
 });
+
+// DINAMIKUS SOROZAT KEZELÉS
+addSetBtn.addEventListener('click', () => {
+    addSetRow();
+});
+
+function addSetRow(weight = '', reps = '') {
+    const rowCount = setsContainer.children.length + 1;
+    const row = document.createElement('div');
+    row.className = 'set-row';
+    row.innerHTML = `
+        <span class="set-number">${rowCount}.</span>
+        <input type="number" class="set-weight" placeholder="Súly (kg)" step="0.5" value="${weight}">
+        <input type="number" class="set-reps" placeholder="Ismétlés" value="${reps}">
+        <button type="button" class="remove-set-btn" onclick="removeSetRow(this)">✕</button>
+    `;
+    setsContainer.appendChild(row);
+    updateRemoveButtonsVisibility();
+}
+
+function removeSetRow(btn) {
+    if (setsContainer.children.length > 1) {
+        btn.closest('.set-row').remove();
+        renumberSetRows();
+    }
+}
+
+function renumberSetRows() {
+    const rows = setsContainer.querySelectorAll('.set-row');
+    rows.forEach((row, idx) => {
+        row.querySelector('.set-number').textContent = `${idx + 1}.`;
+    });
+    updateRemoveButtonsVisibility();
+}
+
+function updateRemoveButtonsVisibility() {
+    const rows = setsContainer.querySelectorAll('.set-row');
+    rows.forEach(row => {
+        const btn = row.querySelector('.remove-set-btn');
+        if (rows.length === 1) {
+            btn.style.visibility = 'hidden';
+        } else {
+            btn.style.visibility = 'visible';
+        }
+    });
+}
+
+function resetSetRows() {
+    setsContainer.innerHTML = '';
+    addSetRow();
+}
 
 // 2. IZOMCSOPORT VÁLTOZÁSKOR
 muscleGroupSelect.addEventListener('change', () => {
-    // Gyakorlat mező és az előzmény elfedése / ürítése váltáskor
     exerciseInput.value = '';
     historyHint.textContent = '';
-    
+    resetSetRows();
     renderQuickExercises();
     handleMuscleGroupChange();
 });
@@ -63,14 +112,10 @@ function handleMuscleGroupChange() {
     if (isCardio) {
         resistanceFields.classList.add('hidden');
         cardioFields.classList.remove('hidden');
-        weightInput.removeAttribute('required');
-        repsInput.removeAttribute('required');
         exerciseInput.placeholder = "pl. Futópad dőlésszöggel";
     } else {
         cardioFields.classList.add('hidden');
         resistanceFields.classList.remove('hidden');
-        weightInput.setAttribute('required', 'true');
-        repsInput.setAttribute('required', 'true');
         exerciseInput.placeholder = "pl. Fekvenyomás";
     }
 }
@@ -162,41 +207,59 @@ form.addEventListener('submit', function(e) {
     const currentExercise = exerciseInput.value.trim();
     const isCardio = currentMuscleGroup === 'Kardió';
 
-    const existingSets = workouts.filter(w => w.date === currentDate && w.exercise.toLowerCase() === currentExercise.toLowerCase());
-    const setNumber = existingSets.length + 1;
-
-    let workout = {
-        id: Date.now(),
-        date: currentDate,
-        muscleGroup: currentMuscleGroup,
-        exercise: currentExercise,
-        isCardio: isCardio,
-        note: noteInput.value.trim()
-    };
-
     if (isCardio) {
-        workout.time = cardioTimeInput.value;
-        workout.incline = cardioInclineInput.value.trim();
-        workout.speed = cardioSpeedInput.value;
+        let workout = {
+            id: Date.now(),
+            date: currentDate,
+            muscleGroup: currentMuscleGroup,
+            exercise: currentExercise,
+            isCardio: true,
+            time: cardioTimeInput.value,
+            incline: cardioInclineInput.value.trim(),
+            speed: cardioSpeedInput.value,
+            note: noteInput.value.trim()
+        };
+        addWorkoutToTable(workout);
+        saveWorkoutToStorage(workout);
     } else {
-        workout.setNumber = setNumber;
-        workout.weight = weightInput.value;
-        workout.reps = repsInput.value;
+        const rows = setsContainer.querySelectorAll('.set-row');
+        const existingSets = workouts.filter(w => w.date === currentDate && w.exercise.toLowerCase() === currentExercise.toLowerCase());
+        let startSetNum = existingSets.length + 1;
+        let addedCount = 0;
+
+        rows.forEach((row, index) => {
+            const weightVal = row.querySelector('.set-weight').value;
+            const repsVal = row.querySelector('.set-reps').value;
+
+            if (weightVal !== '' || repsVal !== '') {
+                let workout = {
+                    id: Date.now() + index,
+                    date: currentDate,
+                    muscleGroup: currentMuscleGroup,
+                    exercise: currentExercise,
+                    isCardio: false,
+                    setNumber: startSetNum + addedCount,
+                    weight: weightVal || '0',
+                    reps: repsVal || '0',
+                    note: noteInput.value.trim()
+                };
+                addWorkoutToTable(workout);
+                saveWorkoutToStorage(workout);
+                addedCount++;
+            }
+        });
     }
 
     addCustomExerciseToGroup(currentMuscleGroup, currentExercise);
-    addWorkoutToTable(workout);
-    saveWorkoutToStorage(workout);
 
-    // Mezők ürítése mentés után
+    // Mezők alaphelyzetbe állítása mentés után
     exerciseInput.value = '';
-    weightInput.value = '';
-    repsInput.value = '';
     cardioTimeInput.value = '';
     cardioInclineInput.value = '';
     cardioSpeedInput.value = '';
     noteInput.value = '';
     historyHint.textContent = '';
+    resetSetRows();
 });
 
 // 4. MEGJELENÍTÉS A TÁBLÁZATBAN
