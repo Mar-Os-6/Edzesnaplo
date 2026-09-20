@@ -46,7 +46,7 @@ const activeTemplateBanner = document.getElementById('active-template-banner');
 const activeTemplateInfo = document.getElementById('active-template-info');
 const cancelTemplateBtn = document.getElementById('cancel-template-btn');
 
-// ÚJ ELEMEK (PR, GRAFIKON, TESTADATOK)
+// PR, GRAFIKON, TESTADATOK & NAPTÁR ELEMEK
 const prSummaryContainer = document.getElementById('pr-summary-container');
 const chartExerciseSelect = document.getElementById('chart-exercise-select');
 const chartContainer = document.getElementById('chart-container');
@@ -60,8 +60,14 @@ const bodyWaistInput = document.getElementById('body-waist');
 const bodyThighInput = document.getElementById('body-thigh');
 const bodyList = document.getElementById('body-list');
 
+const calendarDaysContainer = document.getElementById('calendar-days');
+const calendarMonthTitle = document.getElementById('calendar-month-title');
+
 dateInput.value = new Date().toISOString().split('T')[0];
 if (bodyDateInput) bodyDateInput.value = new Date().toISOString().split('T')[0];
+
+let currentCalendarDate = new Date();
+let currentMuscleFilter = 'Összes';
 
 const defaultExercises = {
     'Mell': ['Fekvenyomás', 'Incline Fekvenyomás', 'Tárogatás'],
@@ -106,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadBodyRecords();
     updatePRSummary();
     populateChartExerciseSelect();
+    renderCalendar();
 
     document.getElementById('cd-minutes')?.addEventListener('input', updateCountdownFromInputs);
     document.getElementById('cd-seconds')?.addEventListener('input', updateCountdownFromInputs);
@@ -124,11 +131,75 @@ function switchTab(viewName) {
         document.querySelectorAll('.bottom-nav .nav-item')[1].classList.add('active');
         updatePRSummary();
         populateChartExerciseSelect();
+        renderCalendar();
     } else if (viewName === 'body') {
         document.getElementById('view-body').classList.remove('hidden');
         document.querySelectorAll('.bottom-nav .nav-item')[2].classList.add('active');
         loadBodyRecords();
     }
+}
+
+// --- EDZÉSNAPTÁR LOGIKA ---
+function renderCalendar() {
+    calendarDaysContainer.innerHTML = '';
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+
+    const monthNames = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
+    calendarMonthTitle.textContent = `${monthNames[month]} ${year}`;
+
+    // Hányadik napon kezdődik a hónap (Hétfő az 1)
+    let firstDayIndex = new Date(year, month, 1).getDay();
+    firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // Vasárnap átrakása 6-ra
+
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const workouts = getWorkoutsFromStorage();
+    const workoutDates = new Set(workouts.map(w => w.date));
+
+    // Üres mezők a hónap kezdete előtt
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day empty';
+        calendarDaysContainer.appendChild(emptyCell);
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Hónap napjai
+    for (let day = 1; day <= totalDays; day++) {
+        const cellDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const cell = document.createElement('div');
+        cell.className = 'calendar-day';
+        cell.textContent = day;
+
+        if (cellDate === todayStr) {
+            cell.classList.add('today');
+        }
+
+        if (workoutDates.has(cellDate)) {
+            cell.classList.add('has-workout');
+            cell.title = "Volt ezen a napon edzés!";
+            cell.onclick = () => {
+                searchFilterInput.value = cellDate;
+                filterWorkoutsTable();
+            };
+        }
+
+        calendarDaysContainer.appendChild(cell);
+    }
+}
+
+function changeMonth(direction) {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+    renderCalendar();
+}
+
+// --- IZOMCSOPORT SZŰRŐ AZ ELŐZMÉNYEKHEZ ---
+function filterHistoryByMuscle(muscleGroup, chipElement) {
+    currentMuscleFilter = muscleGroup;
+    document.querySelectorAll('#history-filter-chips .chip').forEach(c => c.classList.remove('active'));
+    chipElement.classList.add('active');
+    loadWorkouts();
 }
 
 // --- TESTADATOK LOGIKA ---
@@ -658,6 +729,7 @@ form.addEventListener('submit', function(e) {
     loadWorkouts();
     updatePRSummary();
     populateChartExerciseSelect();
+    renderCalendar();
 
     if (activeSession) {
         activeSession.currentIndex++;
@@ -726,6 +798,11 @@ function loadWorkouts() {
 
     const setIndexes = {};
     workouts.forEach(workout => {
+        // Szűrés ellenőrzése
+        if (currentMuscleFilter !== 'Összes' && workout.muscleGroup !== currentMuscleFilter) {
+            return;
+        }
+
         let totalSets = 0, currentSetNum = 1, isPR = false;
         if (!workout.isCardio) {
             const exName = workout.exercise.toLowerCase();
@@ -738,6 +815,8 @@ function loadWorkouts() {
         }
         addWorkoutToTable(workout, totalSets, currentSetNum, isPR);
     });
+
+    filterWorkoutsTable();
 }
 
 function deleteWorkout(id) {
@@ -747,6 +826,7 @@ function deleteWorkout(id) {
     loadWorkouts();
     updatePRSummary();
     populateChartExerciseSelect();
+    renderCalendar();
 }
 
 exportBtn.addEventListener('click', function() {
@@ -779,6 +859,7 @@ importFileInput.addEventListener('change', function(e) {
                     loadWorkouts();
                     updatePRSummary();
                     populateChartExerciseSelect();
+                    renderCalendar();
                     alert('✅ Adatok sikeresen importálva!');
                 }
             } else { alert('⚠️ Helytelen fájlformátum!'); }
@@ -788,12 +869,14 @@ importFileInput.addEventListener('change', function(e) {
     this.value = '';
 });
 
-searchFilterInput.addEventListener('input', function() {
-    const filterValue = this.value.toLowerCase();
+searchFilterInput.addEventListener('input', filterWorkoutsTable);
+
+function filterWorkoutsTable() {
+    const filterValue = searchFilterInput.value.toLowerCase();
     workoutList.querySelectorAll('tr').forEach(row => {
         row.style.display = row.textContent.toLowerCase().includes(filterValue) ? '' : 'none';
     });
-});
+}
 
 // --- STOPPER ÉS IDŐZÍTŐ LOGIKA ---
 function switchTimerTab(tab) {
