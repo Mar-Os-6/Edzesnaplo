@@ -26,8 +26,8 @@ h2 {
     font-size: 1.1rem;
 }
 
-/* Időzítő stílusa */
-.timer-card {
+/* Időzítő és Sablon kártyák stílusa */
+.timer-card, .template-card {
     background-color: #1e1e1e;
     border: 1px solid #333;
     border-radius: 12px;
@@ -36,7 +36,7 @@ h2 {
     margin-bottom: 20px;
 }
 
-.timer-card h3 {
+.timer-card h3, .template-card h3 {
     font-size: 1rem;
     color: #aaa;
     margin-bottom: 8px;
@@ -70,6 +70,48 @@ h2 {
     background-color: #00e676;
     color: black;
     font-weight: bold;
+}
+
+/* Sablon kártya egyedi elemei */
+.active-banner {
+    background-color: #1b382b;
+    border: 1px solid #00e676;
+    color: #00e676;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-btn {
+    background-color: #ff5252;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.create-box {
+    background-color: #252525;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    text-align: left;
+}
+
+.create-box h4 {
+    margin-bottom: 8px;
+    color: #00e676;
+    font-size: 0.9rem;
+}
+
+.danger-text {
+    color: #ff5252 !important;
 }
 
 /* Űrlap elemek */
