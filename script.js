@@ -20,6 +20,8 @@ const noteInput = document.getElementById('note');
 const historyHint = document.getElementById('history-hint');
 const workoutList = document.getElementById('workout-list');
 const exportBtn = document.getElementById('export-btn');
+const importBtn = document.getElementById('import-btn');
+const importFileInput = document.getElementById('import-file');
 const searchFilterInput = document.getElementById('search-filter');
 
 // Mai dátum beállítása
@@ -105,7 +107,6 @@ muscleGroupSelect.addEventListener('change', () => {
     handleMuscleGroupChange();
 });
 
-// MEZŐK VÁLTÁSA: KARDIÓ VS SÚLYZÓS EDZÉS
 function handleMuscleGroupChange() {
     const isCardio = muscleGroupSelect.value === 'Kardió';
     
@@ -120,7 +121,6 @@ function handleMuscleGroupChange() {
     }
 }
 
-// MENTETT GYAKORLATOK LEKÉRÉSE / TÁROLÁSA
 function getCustomExercises() {
     const stored = localStorage.getItem('customExercises');
     return stored ? JSON.parse(stored) : defaultExercises;
@@ -130,7 +130,6 @@ function saveCustomExercises(exercises) {
     localStorage.setItem('customExercises', JSON.stringify(exercises));
 }
 
-// GYORSGYAKORLAT GOMBOK KIRAJZOLÁSA
 function renderQuickExercises() {
     quickExercisesContainer.innerHTML = '';
     const selectedGroup = muscleGroupSelect.value;
@@ -174,7 +173,6 @@ function addCustomExerciseToGroup(group, name) {
     }
 }
 
-// ELŐZŐ SÚLY / KARDIÓ ADAT JAVASLAT
 exerciseInput.addEventListener('input', checkPreviousWeight);
 
 function checkPreviousWeight() {
@@ -244,7 +242,6 @@ form.addEventListener('submit', function(e) {
 
     addCustomExerciseToGroup(currentMuscleGroup, currentExercise);
 
-    // Mezők alaphelyzetbe állítása mentés után
     exerciseInput.value = '';
     cardioTimeInput.value = '';
     cardioInclineInput.value = '';
@@ -253,12 +250,11 @@ form.addEventListener('submit', function(e) {
     historyHint.textContent = '';
     resetSetRows();
 
-    // Táblázat újratöltése a frissített sorszámokkal és sorozatszámítással
     loadWorkouts();
 });
 
-// 4. MEGJELENÍTÉS A TÁBLÁZATBAN
-function addWorkoutToTable(workout, totalSetsCount, currentSetNum) {
+// 4. MEGJELENÍTÉS A TÁBLÁZATBAN PR 🏆 KIEMELÉSSEL
+function addWorkoutToTable(workout, totalSetsCount, currentSetNum, isPR) {
     const tr = document.createElement('tr');
     tr.setAttribute('data-id', workout.id);
 
@@ -272,9 +268,9 @@ function addWorkoutToTable(workout, totalSetsCount, currentSetNum) {
         if (workout.speed) details.push(`${workout.speed} km/h`);
         col5 = details.join(' | ') || '-';
     } else {
-        col4 = `${workout.weight} kg`;
+        const prTag = isPR ? `<span class="pr-badge">🏆 PR</span>` : '';
+        col4 = `${workout.weight} kg ${prTag}`;
         
-        // Csak akkor írjuk ki a (X. sorozat) szöveget, ha 1-nél több sorozat van az adott napon!
         if (totalSetsCount > 1) {
             col5 = `${workout.reps}x <small>(${currentSetNum}. sorozat)</small>`;
         } else {
@@ -295,7 +291,6 @@ function addWorkoutToTable(workout, totalSetsCount, currentSetNum) {
     workoutList.insertBefore(tr, workoutList.firstChild);
 }
 
-// TÁROLÁS, BETÖLTÉS, TÖRLES, EXPORT ÉS STOPPER LOGIKA
 function saveWorkoutToStorage(workout) {
     let workouts = getWorkoutsFromStorage();
     workouts.push(workout);
@@ -306,11 +301,23 @@ function getWorkoutsFromStorage() {
     return localStorage.getItem('workouts') ? JSON.parse(localStorage.getItem('workouts')) : [];
 }
 
+// PR ÉS TÁBLÁZAT BETÖLTÉSI LOGIKA
 function loadWorkouts() {
     workoutList.innerHTML = '';
     const workouts = getWorkoutsFromStorage();
 
-    // Megszámoljuk, hogy az egyes (dátum + gyakorlat) párosokból hány sorozat létezik
+    // Legnagyobb súlyok kiszámítása gyakorlatonként (PR)
+    const maxWeights = {};
+    workouts.forEach(w => {
+        if (!w.isCardio) {
+            const exName = w.exercise.toLowerCase();
+            const weightNum = parseFloat(w.weight) || 0;
+            if (!maxWeights[exName] || weightNum > maxWeights[exName]) {
+                maxWeights[exName] = weightNum;
+            }
+        }
+    });
+
     const setCounts = {};
     workouts.forEach(w => {
         if (!w.isCardio) {
@@ -319,21 +326,28 @@ function loadWorkouts() {
         }
     });
 
-    // Nyomon követjük az aktuális sorozatszámot (1., 2., 3...)
     const setIndexes = {};
 
     workouts.forEach(workout => {
         let totalSets = 0;
         let currentSetNum = 1;
+        let isPR = false;
 
         if (!workout.isCardio) {
-            const key = `${workout.date}_${workout.exercise.toLowerCase()}`;
+            const exName = workout.exercise.toLowerCase();
+            const key = `${workout.date}_${exName}`;
             totalSets = setCounts[key] || 0;
             setIndexes[key] = (setIndexes[key] || 0) + 1;
             currentSetNum = setIndexes[key];
+
+            // PR ellenőrzés: ha a súly eléri a maximális valaha emelt súlyt (és > 0)
+            const currentWeight = parseFloat(workout.weight) || 0;
+            if (currentWeight > 0 && currentWeight === maxWeights[exName]) {
+                isPR = true;
+            }
         }
 
-        addWorkoutToTable(workout, totalSets, currentSetNum);
+        addWorkoutToTable(workout, totalSets, currentSetNum, isPR);
     });
 }
 
@@ -341,11 +355,10 @@ function deleteWorkout(id) {
     let workouts = getWorkoutsFromStorage();
     workouts = workouts.filter(w => w.id !== id);
     localStorage.setItem('workouts', JSON.stringify(workouts));
-    
-    // Törlés után újratöltjük a táblázatot, hogy a megmaradt sorozatok automatikusan újraszámozódjanak
     loadWorkouts();
 }
 
+// EXPORTÁLÁS ÉS IMPORTÁLÁS KEZELÉSE
 exportBtn.addEventListener('click', function() {
     const workouts = getWorkoutsFromStorage();
     if (workouts.length === 0) {
@@ -361,6 +374,43 @@ exportBtn.addEventListener('click', function() {
     downloadAnchor.remove();
 });
 
+importBtn.addEventListener('click', () => {
+    importFileInput.click();
+});
+
+importFileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const importedData = JSON.parse(event.target.result);
+            if (Array.isArray(importedData)) {
+                if (confirm(`Biztosan be akarod tölteni ezt a ${importedData.length} edzésbejegyzést? (Ez összefésüli a jelenlegi adataiddal)`)) {
+                    const currentWorkouts = getWorkoutsFromStorage();
+                    
+                    // Összefésülés duplikáció nélkül (id alapján)
+                    const existingIds = new Set(currentWorkouts.map(w => w.id));
+                    const newWorkouts = importedData.filter(w => !existingIds.has(w.id));
+                    
+                    const mergedWorkouts = [...currentWorkouts, ...newWorkouts];
+                    localStorage.setItem('workouts', JSON.stringify(mergedWorkouts));
+                    
+                    loadWorkouts();
+                    alert('✅ Adatok sikeresen importálva!');
+                }
+            } else {
+                alert('⚠️ Helytelen fájlformátum!');
+            }
+        } catch (err) {
+            alert('⚠️ Hiba történt a fájl beolvasása közben!');
+        }
+    };
+    reader.readAsText(file);
+    this.value = ''; // Reset
+});
+
 searchFilterInput.addEventListener('input', function() {
     const filterValue = this.value.toLowerCase();
     const rows = workoutList.querySelectorAll('tr');
@@ -370,6 +420,7 @@ searchFilterInput.addEventListener('input', function() {
     });
 });
 
+// STOPPER LOGIKA
 let timerInterval = null;
 let secondsLeft = 60;
 let isTimerRunning = false;
