@@ -99,7 +99,7 @@
                         
                         <div class="form-group">
                             <label for="new-template-name">Sablon neve:</label>
-                            <input type="text" id="new-template-name" placeholder="pl. A nap: Mell-Tricepsz">
+                            <input type="text" id="new-template-name" placeholder="pl. Alsótest / Popsi nap">
                         </div>
 
                         <div class="form-group">
@@ -115,7 +115,7 @@
                         <div class="form-group">
                             <label>Egyedi gyakorlat beírása:</label>
                             <div class="input-with-btn">
-                                <input type="text" id="custom-template-ex-input" placeholder="pl. Csigás keresztezés">
+                                <input type="text" id="custom-template-ex-input" placeholder="pl. Csípőemelés (Hip Thrust)">
                                 <button type="button" id="add-custom-template-ex-btn" class="secondary-btn">+ Hozzáad</button>
                             </div>
                         </div>
@@ -150,6 +150,7 @@
                         <option value="Tricepsz">Tricepsz</option>
                         <option value="Váll">Váll</option>
                         <option value="Láb">Láb</option>
+                        <option value="Popsi">Popsi</option>
                         <option value="Has">Has</option>
                         <option value="Kardió">Kardió</option>
                     </select>
@@ -162,7 +163,7 @@
 
                 <div class="form-group">
                     <label for="exercise">Gyakorlat neve:</label>
-                    <input type="text" id="exercise" placeholder="pl. Fekvenyomás" required autocomplete="off">
+                    <input type="text" id="exercise" placeholder="pl. Csípőemelés (Hip Thrust)" required autocomplete="off">
                     <small id="history-hint" class="hint"></small>
                 </div>
 
@@ -258,6 +259,7 @@
                     <div class="chip" onclick="filterHistoryByMuscle('Tricepsz', this)">Tricepsz</div>
                     <div class="chip" onclick="filterHistoryByMuscle('Váll', this)">Váll</div>
                     <div class="chip" onclick="filterHistoryByMuscle('Láb', this)">Láb</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Popsi', this)">Popsi</div>
                     <div class="chip" onclick="filterHistoryByMuscle('Has', this)">Has</div>
                     <div class="chip" onclick="filterHistoryByMuscle('Kardió', this)">Kardió</div>
                 </div>
