@@ -44,29 +44,52 @@
                 <button type="button" id="cancel-template-btn" class="close-btn">✕ Megszakítás</button>
             </div>
 
-            <!-- SABLON VÁLASZTÓ -->
+            <!-- SABLON VÁLASZTÓ ÉS KEZELŐ GOMBOK -->
             <div id="template-select-box" class="form-group">
                 <select id="template-select">
                     <option value="">-- Válassz edzéstervet --</option>
                 </select>
                 <div class="btn-group" style="margin-top: 8px;">
                     <button type="button" id="start-template-btn" class="secondary-btn">🚀 Edzés indítása</button>
+                    <button type="button" id="edit-template-btn" class="secondary-btn">✏️ Szerkesztés</button>
                     <button type="button" id="toggle-new-template-btn" class="secondary-btn">+ Új Sablon</button>
                     <button type="button" id="delete-template-btn" class="secondary-btn danger-text">🗑️ Törlés</button>
                 </div>
             </div>
 
-            <!-- ÚJ SABLON LÉTREHOZÁSA DOBOZ (REJTETT) -->
+            <!-- ÚJ / SZERKESZTETT SABLON LÉTREHOZÁSA DOBOZ -->
             <div id="create-template-box" class="create-box hidden">
-                <h4>Új Sablon Létrehozása</h4>
+                <h4 id="template-form-title">Új Sablon Létrehozása</h4>
+                
                 <div class="form-group">
-                    <input type="text" id="new-template-name" placeholder="Sablon neve (pl. A nap: Mell-Tricepsz)">
+                    <label for="new-template-name">Sablon neve:</label>
+                    <input type="text" id="new-template-name" placeholder="pl. A nap: Mell-Tricepsz">
                 </div>
+
                 <div class="form-group">
-                    <label>Gyakorlatok (vesszővel elválasztva):</label>
-                    <input type="text" id="new-template-exercises" placeholder="pl. Fekvenyomás, Incline Fekvenyomás, Tricepsz letolás">
+                    <label>Érintett izomcsoportok (kattints a kijelöléshez):</label>
+                    <div id="template-muscle-chips" class="chip-container"></div>
                 </div>
-                <div class="btn-group">
+
+                <div class="form-group">
+                    <label>Meglévő gyakorlatok (kattints rá a hozzáadáshoz):</label>
+                    <div id="template-available-exercises" class="chip-container"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Egyedi gyakorlat beírása (ha nincs a listában):</label>
+                    <div class="input-with-btn">
+                        <input type="text" id="custom-template-ex-input" placeholder="pl. Csigás keresztezés">
+                        <button type="button" id="add-custom-template-ex-btn" class="secondary-btn">+ Hozzáad</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>A sablonba kiválasztott gyakorlatok (sorrendben):</label>
+                    <div id="template-selected-exercises" class="chip-container selected-ex-box"></div>
+                </div>
+
+                <div class="btn-group" style="margin-top: 15px;">
                     <button type="button" id="save-new-template-btn" class="secondary-btn">💾 Sablon Mentése</button>
                     <button type="button" id="cancel-new-template-btn" class="secondary-btn">Mégse</button>
                 </div>
