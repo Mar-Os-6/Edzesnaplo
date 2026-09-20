@@ -107,11 +107,33 @@ h2 {
 .create-box h4 {
     margin-bottom: 8px;
     color: #00e676;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 .danger-text {
     color: #ff5252 !important;
+}
+
+.input-with-btn {
+    display: flex;
+    gap: 8px;
+}
+
+.input-with-btn input {
+    flex: 1;
+}
+
+.input-with-btn button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.selected-ex-box {
+    background-color: #1a1a1a;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px dashed #444;
+    min-height: 40px;
 }
 
 /* Űrlap elemek */
@@ -232,11 +254,11 @@ input:focus, select:focus {
     background-color: #2a2a2a;
 }
 
-/* Chipek */
+/* Chipek (Kijelölhető gombok) */
 .chip-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
     margin-top: 5px;
     min-height: 35px;
 }
@@ -244,24 +266,38 @@ input:focus, select:focus {
 .chip {
     background-color: #2a2a2a;
     border: 1px solid #444;
-    color: #00e676;
+    color: #ccc;
     padding: 6px 10px;
     border-radius: 16px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    user-select: none;
+}
+
+.chip.active {
+    background-color: #1b382b;
+    border-color: #00e676;
+    color: #00e676;
+    font-weight: bold;
+}
+
+.chip.selected-chip {
+    background-color: #00e676;
+    color: #000;
+    font-weight: bold;
 }
 
 .chip:hover {
-    background-color: #333;
+    opacity: 0.9;
 }
 
 .chip .delete-chip {
     color: #ff5252;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.9rem;
     padding: 0 2px;
 }
 
@@ -295,7 +331,7 @@ button#save-btn {
 
 .btn-group {
     display: flex;
-    gap: 8px;
+    gap: 6px;
 }
 
 .secondary-btn {
@@ -305,7 +341,7 @@ button#save-btn {
     border: 1px solid #444;
     padding: 8px 10px;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     cursor: pointer;
 }
 
