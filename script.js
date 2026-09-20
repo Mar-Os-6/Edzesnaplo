@@ -1,11 +1,23 @@
-// ELEMEK KIJELÖLÉSE A HTML-BŐL
+// ELEMEK KIJELÖLÉSE
 const form = document.getElementById('workout-form');
 const dateInput = document.getElementById('workout-date');
 const muscleGroupSelect = document.getElementById('muscle-group');
 const quickExercisesContainer = document.getElementById('quick-exercises');
 const exerciseInput = document.getElementById('exercise');
+
+// SÚLYZÓS ÉS KARDIÓ CONTAINER-EK
+const resistanceFields = document.getElementById('resistance-fields');
+const cardioFields = document.getElementById('cardio-fields');
+
+// SÚLYZÓS INPUTOK
 const weightInput = document.getElementById('weight');
 const repsInput = document.getElementById('reps');
+
+// KARDIÓ INPUTOK
+const cardioTimeInput = document.getElementById('cardio-time');
+const cardioInclineInput = document.getElementById('cardio-incline');
+const cardioSpeedInput = document.getElementById('cardio-speed');
+
 const noteInput = document.getElementById('note');
 const historyHint = document.getElementById('history-hint');
 const workoutList = document.getElementById('workout-list');
@@ -15,7 +27,7 @@ const searchFilterInput = document.getElementById('search-filter');
 // Mai dátum beállítása
 dateInput.value = new Date().toISOString().split('T')[0];
 
-// ALAPÉRTELMEZETT GYAKORLATOK IZOMCSOPORTONKÉNT
+// ALAPÉRTELMEZETT GYAKORLATOK
 const defaultExercises = {
     'Mell': ['Fekvenyomás', 'Incline Fekvenyomás', 'Tárogatás'],
     'Bicepsz': ['Bicepsz állva franciarúddal', 'Kalapács hajlítás'],
@@ -24,19 +36,42 @@ const defaultExercises = {
     'Váll': ['Vállból nyomás kézisúlyzóval', 'Oldalemelés'],
     'Láb': ['Guggolás', 'Lábnyomás', 'Lábhajlítás gépen'],
     'Has': ['Hasprés', 'Lábelemelés függeszkedve'],
-    'Kardió': ['Futópad', 'Szobakerékpár']
+    'Kardió': ['Futópad (Incline walking)', 'Lépcsőzőgép', 'Szobakerékpár']
 };
 
 // 1. INDULÁSKOR BETÖLTÉS
 document.addEventListener('DOMContentLoaded', () => {
     loadWorkouts();
     renderQuickExercises();
+    handleMuscleGroupChange();
 });
 
-// 2. IZOMCSOPORT VÁLTOZÁSKOR A GOMBOK ÚJRAKÖZLÉSE
-muscleGroupSelect.addEventListener('change', renderQuickExercises);
+// 2. IZOMCSOPORT VÁLTOZÁSKOR
+muscleGroupSelect.addEventListener('change', () => {
+    renderQuickExercises();
+    handleMuscleGroupChange();
+});
 
-// MENTETT GYAKORLATOK LEKÉRÉSE / TÁROLÁSA BÖNGÉSZŐBŐL
+// MEZŐK VÁLTÁSA: KARDIÓ VS SÚLYZÓS EDZÉS
+function handleMuscleGroupChange() {
+    const isCardio = muscleGroupSelect.value === 'Kardió';
+    
+    if (isCardio) {
+        resistanceFields.classList.add('hidden');
+        cardioFields.classList.remove('hidden');
+        weightInput.removeAttribute('required');
+        repsInput.removeAttribute('required');
+        exerciseInput.placeholder = "pl. Futópad dőlésszöggel";
+    } else {
+        cardioFields.classList.add('hidden');
+        resistanceFields.classList.remove('hidden');
+        weightInput.setAttribute('required', 'true');
+        repsInput.setAttribute('required', 'true');
+        exerciseInput.placeholder = "pl. Fekvenyomás";
+    }
+}
+
+// MENTETT GYAKORLATOK LEKÉRÉSE / TÁROLÁSA
 function getCustomExercises() {
     const stored = localStorage.getItem('customExercises');
     return stored ? JSON.parse(stored) : defaultExercises;
@@ -56,8 +91,6 @@ function renderQuickExercises() {
     groupExercises.forEach(exName => {
         const chip = document.createElement('div');
         chip.className = 'chip';
-        
-        // Rácoppintáskor kitölti a mezőt
         chip.innerHTML = `
             <span onclick="selectExercise('${exName}')">${exName}</span>
             <span class="delete-chip" onclick="deleteCustomExercise(event, '${selectedGroup}', '${exName}')">×</span>
@@ -66,15 +99,13 @@ function renderQuickExercises() {
     });
 }
 
-// RÁKATTINTÁS EGY GYORSGOMBRA
 function selectExercise(name) {
     exerciseInput.value = name;
     checkPreviousWeight();
 }
 
-// GYAKORLAT TÖRLESE A LISTÁBÓL (A PIROS × GOMBBAL)
 function deleteCustomExercise(event, group, name) {
-    event.stopPropagation(); // Ne töltse ki a mezőt kattintáskor
+    event.stopPropagation();
     let allExercises = getCustomExercises();
     if (allExercises[group]) {
         allExercises[group] = allExercises[group].filter(item => item !== name);
@@ -83,13 +114,9 @@ function deleteCustomExercise(event, group, name) {
     }
 }
 
-// ÚJ GYAKORLAT NEVÉNEK ELMENTÉSE AZ IZOMCSOPORTI LISTÁBA
 function addCustomExerciseToGroup(group, name) {
     let allExercises = getCustomExercises();
-    if (!allExercises[group]) {
-        allExercises[group] = [];
-    }
-    // Csak akkor adjuk hozzá, ha még nincs a listában
+    if (!allExercises[group]) allExercises[group] = [];
     const exists = allExercises[group].some(item => item.toLowerCase() === name.toLowerCase());
     if (!exists) {
         allExercises[group].push(name);
@@ -98,7 +125,7 @@ function addCustomExerciseToGroup(group, name) {
     }
 }
 
-// ELŐZŐ SÚLY ELLENŐRZÉSE
+// ELŐZŐ SÚLY / KARDIÓ ADAT JAVASLAT
 exerciseInput.addEventListener('input', checkPreviousWeight);
 
 function checkPreviousWeight() {
@@ -111,13 +138,17 @@ function checkPreviousWeight() {
     const previous = workouts.slice().reverse().find(w => w.exercise.toLowerCase() === query);
     
     if (previous) {
-        historyHint.textContent = `Legutóbb: ${previous.weight} kg x ${previous.reps} (${previous.date})`;
+        if (previous.isCardio) {
+            historyHint.textContent = `Legutóbb: ${previous.time} perc (${previous.incline || '-'}, ${previous.speed ? previous.speed + ' km/h' : '-'})`;
+        } else {
+            historyHint.textContent = `Legutóbb: ${previous.weight} kg x ${previous.reps} (${previous.date})`;
+        }
     } else {
         historyHint.textContent = '';
     }
 }
 
-// 3. MENTÉS GOMB MEGNYOMÁSA
+// 3. MENTÉS GOMB
 form.addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -125,30 +156,40 @@ form.addEventListener('submit', function(e) {
     const currentDate = dateInput.value;
     const currentMuscleGroup = muscleGroupSelect.value;
     const currentExercise = exerciseInput.value.trim();
+    const isCardio = currentMuscleGroup === 'Kardió';
 
-    // Hányadik sorozat ma
     const existingSets = workouts.filter(w => w.date === currentDate && w.exercise.toLowerCase() === currentExercise.toLowerCase());
     const setNumber = existingSets.length + 1;
 
-    const workout = {
+    let workout = {
         id: Date.now(),
         date: currentDate,
         muscleGroup: currentMuscleGroup,
         exercise: currentExercise,
-        setNumber: setNumber,
-        weight: weightInput.value,
-        reps: repsInput.value,
+        isCardio: isCardio,
         note: noteInput.value.trim()
     };
 
-    // Elmentjük a gyakorlat nevet is a gombok közé a jövőre nézve
-    addCustomExerciseToGroup(currentMuscleGroup, currentExercise);
+    if (isCardio) {
+        workout.time = cardioTimeInput.value;
+        workout.incline = cardioInclineInput.value.trim();
+        workout.speed = cardioSpeedInput.value;
+    } else {
+        workout.setNumber = setNumber;
+        workout.weight = weightInput.value;
+        workout.reps = repsInput.value;
+    }
 
+    addCustomExerciseToGroup(currentMuscleGroup, currentExercise);
     addWorkoutToTable(workout);
     saveWorkoutToStorage(workout);
 
+    // Mezők ürítése
     weightInput.value = '';
     repsInput.value = '';
+    cardioTimeInput.value = '';
+    cardioInclineInput.value = '';
+    cardioSpeedInput.value = '';
     noteInput.value = '';
     historyHint.textContent = '';
 });
@@ -158,12 +199,26 @@ function addWorkoutToTable(workout) {
     const tr = document.createElement('tr');
     tr.setAttribute('data-id', workout.id);
 
+    let col4 = '';
+    let col5 = '';
+
+    if (workout.isCardio) {
+        col4 = `⏱️ ${workout.time || '0'} perc`;
+        let details = [];
+        if (workout.incline) details.push(`Dőlés/Fokozat: ${workout.incline}`);
+        if (workout.speed) details.push(`${workout.speed} km/h`);
+        col5 = details.join(' | ') || '-';
+    } else {
+        col4 = `${workout.weight} kg`;
+        col5 = `${workout.reps}x <small>(${workout.setNumber || 1}. soroz)</small>`;
+    }
+
     tr.innerHTML = `
         <td>${workout.date}</td>
         <td><small>${workout.muscleGroup || '-'}</small></td>
-        <td><strong>${workout.exercise}</strong> <small>(${workout.setNumber}. sorozat)</small></td>
-        <td>${workout.weight} kg</td>
-        <td>${workout.reps}x</td>
+        <td><strong>${workout.exercise}</strong></td>
+        <td>${col4}</td>
+        <td>${col5}</td>
         <td>${workout.note || '-'}</td>
         <td><button class="delete-btn" onclick="deleteWorkout(${workout.id})">X</button></td>
     `;
@@ -171,7 +226,7 @@ function addWorkoutToTable(workout) {
     workoutList.insertBefore(tr, workoutList.firstChild);
 }
 
-// 5. STORAGE KEZELÉS
+// TÁROLÁS, EXPORT, SZŰRŐ ÉS STOPPER LOGIKA (SÉTATLANUL)
 function saveWorkoutToStorage(workout) {
     let workouts = getWorkoutsFromStorage();
     workouts.push(workout);
@@ -196,7 +251,6 @@ function deleteWorkout(id) {
     localStorage.setItem('workouts', JSON.stringify(workouts));
 }
 
-// 6. ADATOK EXPORTÁLÁSA
 exportBtn.addEventListener('click', function() {
     const workouts = getWorkoutsFromStorage();
     if (workouts.length === 0) {
@@ -212,22 +266,15 @@ exportBtn.addEventListener('click', function() {
     downloadAnchor.remove();
 });
 
-// 7. TÁBLÁZAT KERESŐ / SZŰRŐ LOGIKA
 searchFilterInput.addEventListener('input', function() {
     const filterValue = this.value.toLowerCase();
     const rows = workoutList.querySelectorAll('tr');
-    
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
-        if (text.includes(filterValue)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        row.style.display = text.includes(filterValue) ? '' : 'none';
     });
 });
 
-// 8. STOPPER LOGIKA (REZGÉSSEL ÉS SÍPOLÓ HANGGAL)
 let timerInterval = null;
 let secondsLeft = 60;
 let isTimerRunning = false;
@@ -247,22 +294,19 @@ function setTimer(seconds) {
     updateTimerDisplay();
 }
 
-// SÍPOLÓ HANG GENERÁLÁSA BÖNGÉSZŐBŐL (KÜLSŐ AUDIO FÁJL NÉLKÜL)
 function playBeep() {
     try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.value = 800; // Hangmagasság (800 Hz)
+        osc.frequency.value = 800;
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
         gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.8);
         setTimeout(() => osc.stop(), 800);
-    } catch (e) {
-        console.log('Audio nem támogatott');
-    }
+    } catch (e) {}
 }
 
 document.getElementById('start-timer-btn').addEventListener('click', function() {
@@ -281,13 +325,8 @@ document.getElementById('start-timer-btn').addEventListener('click', function() 
                 clearInterval(timerInterval);
                 isTimerRunning = false;
                 document.getElementById('start-timer-btn').textContent = 'Start';
-                
-                // REZGÉS ÉS SÍPOLÁS LEJÁRTAKOR
-                if ('vibrate' in navigator) {
-                    navigator.vibrate([300, 100, 300, 100, 300]); // 3 rövid rezgés
-                }
-                playBeep(); // Sípoló hang megszólaltatása
-
+                if ('vibrate' in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
+                playBeep();
                 alert('⏱️ Lejárt a pihenőidő!');
             }
         }, 1000);
