@@ -48,6 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 2. IZOMCSOPORT VÁLTOZÁSKOR
 muscleGroupSelect.addEventListener('change', () => {
+    // Gyakorlat mező és az előzmény elfedése / ürítése váltáskor
+    exerciseInput.value = '';
+    historyHint.textContent = '';
+    
     renderQuickExercises();
     handleMuscleGroupChange();
 });
@@ -184,7 +188,8 @@ form.addEventListener('submit', function(e) {
     addWorkoutToTable(workout);
     saveWorkoutToStorage(workout);
 
-    // Mezők ürítése
+    // Mezők ürítése mentés után
+    exerciseInput.value = '';
     weightInput.value = '';
     repsInput.value = '';
     cardioTimeInput.value = '';
@@ -226,7 +231,7 @@ function addWorkoutToTable(workout) {
     workoutList.insertBefore(tr, workoutList.firstChild);
 }
 
-// TÁROLÁS, EXPORT, SZŰRŐ ÉS STOPPER LOGIKA (SÉTATLANUL)
+// TÁROLÁS, EXPORT, SZŰRŐ ÉS STOPPER LOGIKA
 function saveWorkoutToStorage(workout) {
     let workouts = getWorkoutsFromStorage();
     workouts.push(workout);
