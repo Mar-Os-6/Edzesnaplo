@@ -7,16 +7,17 @@ const ASSETS = [
     './manifest.json'
 ];
 
-// 1. TELEPÍTÉS - Fájlok elmentése a telefon memóriájába (Cache)
+// 1. TELEPÍTÉS
 self.addEventListener('install', (e) => {
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS);
         })
     );
+    self.skipWaiting();
 });
 
-// 2. AKTIVÁLÁS - Régi gyorsítótár törlése frissítéskor
+// 2. AKTIVÁLÁS - Régi gyorsítótár azonnali törlése
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keys) => {
@@ -29,13 +30,23 @@ self.addEventListener('activate', (e) => {
             );
         })
     );
+    self.clients.claim();
 });
 
-// 3. KÉRÉSEK ELCSÍPÉSE - Ha offline vagyunk, a telefonról tölti be a fájlokat
+// 3. KÉRÉSEK ELCSÍPÉSE - Hálózat először, offline esetén cache
 self.addEventListener('fetch', (e) => {
     e.respondWith(
-        caches.match(e.request).then((cachedResponse) => {
-            return cachedResponse || fetch(e.request);
-        })
+        fetch(e.request)
+            .then((networkResponse) => {
+                // Ha van net, frissítjük a cache-t a legújabbal a háttérben
+                return caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(e.request, networkResponse.clone());
+                    return networkResponse;
+                });
+            })
+            .catch(() => {
+                // Ha nincs net (offline vagyunk), adjuk a mentett cache-t
+                return caches.match(e.request);
+            })
     );
 });
