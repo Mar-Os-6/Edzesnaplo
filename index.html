@@ -8,18 +8,11 @@
 </head>
 <body>
     <div class="container">
-        <!-- MELLÉKLETTEL EGYÜTTI CÍMSOR -->
-        <header class="app-header">
-            <h1>💪 Edzés Napló</h1>
-            <p class="subtitle">Kövesd a fejlődésed napról napra</p>
-        </header>
+        <h1>Edzés Napló</h1>
 
         <!-- ÖSSZECSUKHATÓ IDŐZÍTŐ ÉS STOPPER -->
         <details class="timer-accordion">
-            <summary class="timer-summary">
-                <span>⏱️ Időzítő & Stopperóra</span>
-                <span class="chevron">▼</span>
-            </summary>
+            <summary class="timer-summary">⏱️ Időzítő & Stopperóra</summary>
             <div class="timer-content">
                 <!-- Módválasztó fülek -->
                 <div class="timer-tabs">
@@ -48,7 +41,7 @@
                         </div>
                         <div class="input-group-time">
                             <input type="number" id="cd-seconds" value="0" min="0" max="59">
-                            <label>mp</label>
+                            <label>másodperc</label>
                         </div>
                     </div>
 
@@ -69,8 +62,8 @@
         </details>
 
         <!-- SABLON KÁRTYA -->
-        <div class="card template-card">
-            <h3>📋 Edzéssablonok</h3>
+        <div class="template-card">
+            <h3>🏋️ Edzéssablonok</h3>
             <div id="active-template-banner" class="active-banner hidden">
                 <span id="active-template-name"></span>
                 <button type="button" class="close-btn" onclick="clearActiveTemplate()">Kilépés</button>
@@ -91,12 +84,12 @@
                 <label>Gyakorlatok kiválasztása:</label>
                 <div id="template-exercise-chips" class="chip-container"></div>
                 <div class="selected-ex-box" id="selected-template-exercises-text">Nincs kiválasztva gyakorlat.</div>
-                <button type="button" id="save-template-btn" class="primary-timer-btn" style="width: 100%; margin-top: 12px;" onclick="saveNewTemplate()">Sablon Mentése</button>
+                <button type="button" id="save-template-btn" class="primary-timer-btn" style="width: 100%; margin-top: 10px;" onclick="saveNewTemplate()">Sablon Mentése</button>
             </div>
         </div>
 
         <!-- EDZÉS RÖGZÍTÉSE ÚRLAP -->
-        <form id="workout-form" class="card">
+        <form id="workout-form">
             <div class="form-row">
                 <div class="form-group">
                     <label for="date">Dátum:</label>
@@ -153,20 +146,20 @@
         <div class="action-header">
             <h2>Előző edzések</h2>
             <div class="btn-group">
-                <button type="button" class="secondary-btn" onclick="exportData()">Export</button>
-                <button type="button" class="secondary-btn" onclick="triggerImport()">Import</button>
+                <button type="button" class="secondary-btn" onclick="exportData()">Exportálás</button>
+                <button type="button" class="secondary-btn" onclick="triggerImport()">Importálás</button>
                 <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
             </div>
         </div>
 
-        <div class="table-wrapper card">
+        <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
                         <th>Dátum</th>
                         <th>Gyakorlat</th>
-                        <th>Sorozatok</th>
-                        <th>Művelet</th>
+                        <th>Sorozatok (kg x ismétlés)</th>
+                        <th>Műveletek</th>
                     </tr>
                 </thead>
                 <tbody id="workout-history-body">
