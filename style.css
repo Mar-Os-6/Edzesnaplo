@@ -18,16 +18,61 @@ body {
 
 h1 {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     color: #00e676;
 }
 
 h2 {
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
+/* Időzítő kártya stílusa */
+.timer-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.timer-card h3 {
+    font-size: 1rem;
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+#timer-display {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #00e676;
+    margin: 8px 0;
+}
+
+.timer-buttons, .timer-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.timer-btn, .timer-controls button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    background-color: #2a2a2a;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.timer-controls #start-timer-btn {
+    background-color: #00e676;
+    color: black;
+    font-weight: bold;
+}
+
+/* Űrlap elemek */
 .form-group {
     margin-bottom: 12px;
 }
@@ -44,7 +89,7 @@ h2 {
 label {
     display: block;
     margin-bottom: 5px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #aaa;
 }
 
@@ -63,6 +108,13 @@ input:focus {
     border-color: #00e676;
 }
 
+.hint {
+    color: #00e676;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: block;
+}
+
 button#save-btn {
     width: 100%;
     padding: 14px;
@@ -76,10 +128,25 @@ button#save-btn {
     margin-top: 5px;
 }
 
-button#save-btn:active {
-    background-color: #00b359;
+.action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    margin-bottom: 10px;
 }
 
+.secondary-btn {
+    background-color: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+/* Táblázat */
 .table-wrapper {
     overflow-x: auto;
 }
@@ -94,22 +161,22 @@ table {
 }
 
 th, td {
-    padding: 12px;
+    padding: 10px 8px;
     text-align: left;
     border-bottom: 1px solid #2a2a2a;
+    font-size: 0.85rem;
 }
 
 th {
     background-color: #252525;
     color: #888;
-    font-size: 0.85rem;
 }
 
 .delete-btn {
     background-color: #ff5252;
     color: white;
     border: none;
-    padding: 6px 10px;
-    border-radius: 5px;
+    padding: 5px 8px;
+    border-radius: 4px;
     cursor: pointer;
 }
