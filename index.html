@@ -59,19 +59,16 @@
                 <small id="history-hint" class="hint"></small>
             </div>
 
-            <!-- SÚLYZÓS MEZŐK (ALAPÉRTELMEZETT) -->
-            <div id="resistance-fields" class="form-row">
-                <div class="form-group">
-                    <label for="weight">Súly (kg):</label>
-                    <input type="number" id="weight" placeholder="80" step="0.5">
+            <!-- DINAMIKUS SÚLYZÓS SOROZATOK -->
+            <div id="resistance-fields">
+                <label class="section-label">Sorozatok:</label>
+                <div id="sets-container">
+                    <!-- Dinamikusan generált sorozat sorok -->
                 </div>
-                <div class="form-group">
-                    <label for="reps">Ismétlés:</label>
-                    <input type="number" id="reps" placeholder="10">
-                </div>
+                <button type="button" id="add-set-btn" class="secondary-btn-full">+ SOROZAT HOZZÁADÁSA</button>
             </div>
 
-            <!-- KARDIÓ MEZŐK (AUTOMATIKUSAN JELENIK MEG KARDIÓNÁL) -->
+            <!-- KARDIÓ MEZŐK -->
             <div id="cardio-fields" class="form-row hidden">
                 <div class="form-group">
                     <label for="cardio-time">Idő (perc):</label>
@@ -87,7 +84,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 15px;">
                 <label for="note">Megjegyzés (pl. könnyű volt, 2. fokozat):</label>
                 <input type="text" id="note" placeholder="Opcionális megjegyzés">
             </div>
