@@ -3,19 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edzésnapló</title>
+    <title>Profi Edzésnapló</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>🏋️‍♂️ Edzésnapló</h1>
-        
+
+        <!-- 1. KÜLÖNÁLLÓ PIHENŐIDŐ IDŐZÍTŐ -->
+        <div class="timer-card">
+            <h3>⏱️ Pihenőidő Stopper</h3>
+            <div id="timer-display">01:30</div>
+            <div class="timer-buttons">
+                <button type="button" class="timer-btn" onclick="setTimer(60)">60 mp</button>
+                <button type="button" class="timer-btn" onclick="setTimer(90)">90 mp</button>
+                <button type="button" class="timer-btn" onclick="setTimer(120)">120 mp</button>
+            </div>
+            <div class="timer-controls">
+                <button type="button" id="start-timer-btn">Start / Szünet</button>
+                <button type="button" id="reset-timer-btn">Visszaállítás</button>
+            </div>
+        </div>
+
+        <!-- 2. EDZÉSRÖGZÍTŐ ŰRLAP -->
         <form id="workout-form">
             <div class="form-group">
-                <label for="exercise">Gyakorlat neve:</label>
-                <input type="text" id="exercise" placeholder="pl. Fekvenyomás" required>
+                <label for="workout-date">Dátum:</label>
+                <input type="date" id="workout-date" required>
             </div>
-            
+
+            <div class="form-group">
+                <label for="exercise">Gyakorlat neve:</label>
+                <input type="text" id="exercise" placeholder="pl. Fekvenyomás" required autocomplete="off">
+                <!-- Itt jelenik meg az előző súly tippként -->
+                <small id="history-hint" class="hint"></small>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="weight">Súly (kg):</label>
@@ -27,22 +50,34 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label for="note">Megjegyzés (pl. könnyű volt, 2. fokozat):</label>
+                <input type="text" id="note" placeholder="Opcionális megjegyzés">
+            </div>
+
             <button type="submit" id="save-btn">Mentés</button>
         </form>
 
-        <h2>Mai edzés</h2>
+        <!-- 3. ELŐZMÉNYEK ÉS ADATLETÖLTÉS -->
+        <div class="action-header">
+            <h2>Mai és korábbi edzések</h2>
+            <button id="export-btn" class="secondary-btn">💾 Adatok letöltése</button>
+        </div>
+
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th>Gyakorlat</th>
+                        <th>Dátum</th>
+                        <th>Gyakorlat (Sorozatszám)</th>
                         <th>Súly</th>
                         <th>Ismétlés</th>
+                        <th>Jegyzet</th>
                         <th>Törlés</th>
                     </tr>
                 </thead>
                 <tbody id="workout-list">
-                    <!-- Itt jelennek meg a mentett gyakorlatok -->
+                    <!-- A JavaScript ide szúrja be a sorokat -->
                 </tbody>
             </table>
         </div>
