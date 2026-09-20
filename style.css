@@ -26,7 +26,7 @@ h2 {
     font-size: 1.1rem;
 }
 
-/* Időzítő kártya stílusa */
+/* Időzítő stílusa */
 .timer-card {
     background-color: #1e1e1e;
     border: 1px solid #333;
@@ -72,7 +72,7 @@ h2 {
     font-weight: bold;
 }
 
-/* Űrlap elemek */
+/* Űrlap és elemek */
 .form-group {
     margin-bottom: 12px;
 }
@@ -93,26 +93,62 @@ label {
     color: #aaa;
 }
 
-/*
- EGYFORMA MAGASSÁG ÉS KINÉZET MINDEN BEVITELI MEZŐNEK (DÁTUM, SZÖVEG, SZÁM)
-*/
-input, input[type="date"] {
+/* Beviteli mezők és gördülőmenü egységesítése */
+input, select, input[type="date"] {
     width: 100%;
-    height: 46px; /* Rögzített pontos magasság */
+    height: 46px;
     padding: 0 12px;
     border-radius: 8px;
     border: 1px solid #333;
     background-color: #1e1e1e;
     color: #fff;
-    font-size: 16px; /* A 16px megelőzi, hogy az iPhone automatikusan ránagyítson a mezőre */
-    -webkit-appearance: none; /* Kikapcsolja a Safari egyedi gyári stílusát */
+    font-size: 16px;
+    -webkit-appearance: none;
     appearance: none;
     box-sizing: border-box;
 }
 
-input:focus {
+input:focus, select:focus {
     outline: none;
     border-color: #00e676;
+}
+
+/* GYORSGYAKORLAT GOMBOK (CHIPEK) STÍLUSA */
+.chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 5px;
+    min-height: 35px;
+}
+
+.chip {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #00e676;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.chip:hover {
+    background-color: #333;
+}
+
+.chip .delete-chip {
+    color: #ff5252;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 0 2px;
+    border-radius: 50%;
+}
+
+.chip .delete-chip:hover {
+    color: #ff1744;
 }
 
 .hint {
