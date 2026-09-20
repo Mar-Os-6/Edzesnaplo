@@ -194,6 +194,19 @@
 
         <!-- ================= 2. NÉZET: ELŐZMÉNYEK & PR-OK ================= -->
         <div id="view-history" class="app-view hidden">
+            <!-- EDZÉSNAPTÁR KÁRTYA -->
+            <div class="template-card" style="margin-bottom: 15px;">
+                <div class="calendar-header">
+                    <button type="button" class="secondary-btn" onclick="changeMonth(-1)">◀ Előző</button>
+                    <h3 id="calendar-month-title" style="margin: 0; color: #00e676;">Naptár</h3>
+                    <button type="button" class="secondary-btn" onclick="changeMonth(1)">Következő ▶</button>
+                </div>
+                <div class="calendar-grid-header">
+                    <span>H</span><span>K</span><span>Sz</span><span>Cs</span><span>P</span><span>Sz</span><span>V</span>
+                </div>
+                <div id="calendar-days" class="calendar-grid"></div>
+            </div>
+
             <!-- PR ÉS GRAFIKON SZEKCIÓ -->
             <div class="template-card" style="margin-bottom: 15px;">
                 <h3>🏆 Személyes Rekordok (PR)</h3>
@@ -220,6 +233,22 @@
                     <button id="import-btn" class="secondary-btn">📥 Adatok feltöltése</button>
                     <input type="file" id="import-file" accept=".json" style="display: none;">
                     <button id="export-btn" class="secondary-btn">💾 Adatok letöltése</button>
+                </div>
+            </div>
+
+            <!-- IZOMCSOPORT SZŰRŐ CHIPEK -->
+            <div class="form-group" style="margin-bottom: 8px;">
+                <label>Szűrés izomcsoport szerint:</label>
+                <div id="history-filter-chips" class="chip-container">
+                    <div class="chip active" onclick="filterHistoryByMuscle('Összes', this)">Összes</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Mell', this)">Mell</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Bicepsz', this)">Bicepsz</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Hát', this)">Hát</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Tricepsz', this)">Tricepsz</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Váll', this)">Váll</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Láb', this)">Láb</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Has', this)">Has</div>
+                    <div class="chip" onclick="filterHistoryByMuscle('Kardió', this)">Kardió</div>
                 </div>
             </div>
 
