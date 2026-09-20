@@ -11,17 +11,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Edzésnapló">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2548/2548537.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2964/2964514.png">
 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🏋️‍♂️ Edzésnapló</h1>
+        <h1>🏋️ Edzésnapló</h1>
 
         <!-- ================= 1. NÉZET: EDZÉS (FŐOLDAL) ================= -->
         <div id="view-workout" class="app-view">
-            <!-- IDŐZÍTŐ ÉS STOPPER -->
+            <!-- IDŐZÍTŐ ÉS STOPPER (LENYÍLÓ) -->
             <details class="timer-accordion">
                 <summary class="timer-summary">
                     <span>⏱️ Időzítő & Stopperóra</span>
@@ -29,8 +29,8 @@
                 </summary>
                 <div class="timer-content">
                     <div class="timer-tabs">
-                        <button type="button" id="tab-stopwatch" class="tab-btn active" onclick="switchTimerTab('stopwatch')">Stopper (Felfelé)</button>
-                        <button type="button" id="tab-countdown" class="tab-btn" onclick="switchTimerTab('countdown')">Időzítő (Lefelé)</button>
+                        <button type="button" id="tab-stopwatch" class="tab-btn active" onclick="switchTimerTab('stopwatch')">Stopper</button>
+                        <button type="button" id="tab-countdown" class="tab-btn" onclick="switchTimerTab('countdown')">Időzítő</button>
                     </div>
 
                     <div id="stopwatch-view" class="timer-view">
@@ -70,64 +70,68 @@
                 </div>
             </details>
 
-            <!-- EDZÉSTERV SABLONOK KÁRTYA -->
-            <div class="template-card">
-                <h3>📋 Edzésterv Sablonok</h3>
-                
-                <div id="active-template-banner" class="active-banner hidden">
-                    <span id="active-template-info"></span>
-                    <button type="button" id="cancel-template-btn" class="close-btn">✕ Megszakítás</button>
-                </div>
-
-                <div id="template-select-box" class="form-group">
-                    <select id="template-select">
-                        <option value="">-- Válassz edzéstervet --</option>
-                    </select>
-                    <div class="btn-group" style="margin-top: 8px;">
-                        <button type="button" id="start-template-btn" class="secondary-btn">🚀 Edzés indítása</button>
-                        <button type="button" id="edit-template-btn" class="secondary-btn">✏️ Szerkesztés</button>
-                        <button type="button" id="toggle-new-template-btn" class="secondary-btn">+ Új Sablon</button>
-                        <button type="button" id="delete-template-btn" class="secondary-btn danger-text">🗑️ Törlés</button>
-                    </div>
-                </div>
-
-                <div id="create-template-box" class="create-box hidden">
-                    <h4 id="template-form-title">Új Sablon Létrehozása</h4>
-                    
-                    <div class="form-group">
-                        <label for="new-template-name">Sablon neve:</label>
-                        <input type="text" id="new-template-name" placeholder="pl. A nap: Mell-Tricepsz">
+            <!-- EDZÉSTERV SABLONOK (LENYÍLÓ KÁRTYA) -->
+            <details class="timer-accordion">
+                <summary class="timer-summary">
+                    <span>📋 Edzésterv Sablonok</span>
+                    <span class="chevron">▼</span>
+                </summary>
+                <div class="timer-content" style="text-align: left;">
+                    <div id="active-template-banner" class="active-banner hidden">
+                        <span id="active-template-info"></span>
+                        <button type="button" id="cancel-template-btn" class="close-btn">✕ Megszakítás</button>
                     </div>
 
-                    <div class="form-group">
-                        <label>Érintett izomcsoportok (kattints a kijelöléshez):</label>
-                        <div id="template-muscle-chips" class="chip-container"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Meglévő gyakorlatok (kattints rá a hozzáadáshoz):</label>
-                        <div id="template-available-exercises" class="chip-container"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Egyedi gyakorlat beírása (ha nincs a listában):</label>
-                        <div class="input-with-btn">
-                            <input type="text" id="custom-template-ex-input" placeholder="pl. Csigás keresztezés">
-                            <button type="button" id="add-custom-template-ex-btn" class="secondary-btn">+ Hozzáad</button>
+                    <div id="template-select-box" class="form-group" style="margin-bottom: 0;">
+                        <select id="template-select">
+                            <option value="">-- Válassz edzéstervet --</option>
+                        </select>
+                        <div class="btn-group" style="margin-top: 10px;">
+                            <button type="button" id="start-template-btn" class="secondary-btn">🚀 Indítás</button>
+                            <button type="button" id="edit-template-btn" class="secondary-btn">✏️ Szerkesztés</button>
+                            <button type="button" id="toggle-new-template-btn" class="secondary-btn">+ Új</button>
+                            <button type="button" id="delete-template-btn" class="secondary-btn danger-text">🗑️ Törlés</button>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>A sablonba kiválasztott gyakorlatok (sorrendben):</label>
-                        <div id="template-selected-exercises" class="chip-container selected-ex-box"></div>
-                    </div>
+                    <div id="create-template-box" class="create-box hidden">
+                        <h4 id="template-form-title">Új Sablon Létrehozása</h4>
+                        
+                        <div class="form-group">
+                            <label for="new-template-name">Sablon neve:</label>
+                            <input type="text" id="new-template-name" placeholder="pl. A nap: Mell-Tricepsz">
+                        </div>
 
-                    <div class="btn-group" style="margin-top: 15px;">
-                        <button type="button" id="save-new-template-btn" class="secondary-btn">💾 Sablon Mentése</button>
-                        <button type="button" id="cancel-new-template-btn" class="secondary-btn">Mégse</button>
+                        <div class="form-group">
+                            <label>Érintett izomcsoportok:</label>
+                            <div id="template-muscle-chips" class="chip-container"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Meglévő gyakorlatok:</label>
+                            <div id="template-available-exercises" class="chip-container"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Egyedi gyakorlat beírása:</label>
+                            <div class="input-with-btn">
+                                <input type="text" id="custom-template-ex-input" placeholder="pl. Csigás keresztezés">
+                                <button type="button" id="add-custom-template-ex-btn" class="secondary-btn">+ Hozzáad</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kiválasztott gyakorlatok:</label>
+                            <div id="template-selected-exercises" class="chip-container selected-ex-box"></div>
+                        </div>
+
+                        <div class="btn-group" style="margin-top: 15px;">
+                            <button type="button" id="save-new-template-btn" class="secondary-btn">💾 Mentés</button>
+                            <button type="button" id="cancel-new-template-btn" class="secondary-btn">Mégse</button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </details>
 
             <!-- EDZÉSRÖGZÍTŐ ŰRLAP -->
             <form id="workout-form">
@@ -138,7 +142,8 @@
 
                 <div class="form-group">
                     <label for="muscle-group">Izomcsoport:</label>
-                    <select id="muscle-group">
+                    <select id="muscle-group" required>
+                        <option value="" disabled selected>-- Válasszon izomcsoportot --</option>
                         <option value="Mell">Mell</option>
                         <option value="Bicepsz">Bicepsz</option>
                         <option value="Hát">Hát</option>
@@ -151,7 +156,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Kattints a gyakorlatra (vagy írd be alább):</label>
+                    <label>Gyakorlat gyorsválasztó:</label>
                     <div id="quick-exercises" class="chip-container"></div>
                 </div>
 
@@ -174,7 +179,7 @@
                     </div>
                     <div class="form-group">
                         <label for="cardio-incline">Dőlésszög / Fokozat:</label>
-                        <input type="text" id="cardio-incline" placeholder="pl. 12% vagy 8. fokozat">
+                        <input type="text" id="cardio-incline" placeholder="pl. 12%">
                     </div>
                     <div class="form-group">
                         <label for="cardio-speed">Sebesség (km/h):</label>
@@ -182,7 +187,7 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-top: 15px;">
+                <div class="form-group" style="margin-top: 12px;">
                     <label for="note">Megjegyzés:</label>
                     <input type="text" id="note" placeholder="Opcionális megjegyzés">
                 </div>
@@ -195,28 +200,34 @@
         <!-- ================= 2. NÉZET: ELŐZMÉNYEK & PR-OK ================= -->
         <div id="view-history" class="app-view hidden">
             <!-- EDZÉSNAPTÁR KÁRTYA -->
-            <div class="template-card" style="margin-bottom: 15px;">
-                <div class="calendar-header">
-                    <button type="button" class="cal-nav-btn" onclick="changeMonth(-1)">◀</button>
-                    <h3 id="calendar-month-title" style="margin: 0; color: #00e676; font-size: 0.95rem;">Naptár</h3>
-                    <button type="button" class="cal-nav-btn" onclick="changeMonth(1)">▶</button>
+            <details class="timer-accordion" open>
+                <summary class="timer-summary">
+                    <span>📅 Edzésnaptár & PR-ok</span>
+                    <span class="chevron">▼</span>
+                </summary>
+                <div class="timer-content">
+                    <div class="calendar-header">
+                        <button type="button" class="cal-nav-btn" onclick="changeMonth(-1)">◀</button>
+                        <h3 id="calendar-month-title" style="margin: 0; color: #00e676; font-size: 0.95rem;">Naptár</h3>
+                        <button type="button" class="cal-nav-btn" onclick="changeMonth(1)">▶</button>
+                    </div>
+                    <div class="calendar-grid-header" style="margin-top: 10px;">
+                        <span>H</span><span>K</span><span>Sz</span><span>Cs</span><span>P</span><span>Sz</span><span>V</span>
+                    </div>
+                    <div id="calendar-days" class="calendar-grid"></div>
                 </div>
-                <div class="calendar-grid-header">
-                    <span>H</span><span>K</span><span>Sz</span><span>Cs</span><span>P</span><span>Sz</span><span>V</span>
-                </div>
-                <div id="calendar-days" class="calendar-grid"></div>
-            </div>
+            </details>
 
             <!-- PR ÉS GRAFIKON SZEKCIÓ -->
-            <div class="template-card" style="margin-bottom: 15px;">
-                <h3>🏆 Személyes Rekordok (PR)</h3>
+            <div class="template-card" style="margin-bottom: 15px; text-align: left;">
+                <h3 style="color: #00e676; margin-bottom: 8px;">🏆 Személyes Rekordok (PR)</h3>
                 <div id="pr-summary-container" class="pr-summary-box">
                     <small style="color: #888;">Még nincsenek rögzített súlyok.</small>
                 </div>
             </div>
 
-            <div class="template-card" style="margin-bottom: 20px;">
-                <h3>📈 Fejlődési Görbe (Gyakorlatonként)</h3>
+            <div class="template-card" style="margin-bottom: 20px; text-align: left;">
+                <h3 style="color: #00e676; margin-bottom: 8px;">📈 Fejlődési Görbe</h3>
                 <div class="form-group" style="margin-bottom: 10px;">
                     <select id="chart-exercise-select" onchange="renderChart()">
                         <option value="">-- Válassz gyakorlatot --</option>
@@ -230,9 +241,9 @@
             <div class="action-header" style="margin-top: 0;">
                 <h2>Mai és korábbi edzések</h2>
                 <div class="btn-group">
-                    <button id="import-btn" class="secondary-btn">📥 Adatok feltöltése</button>
+                    <button id="import-btn" class="secondary-btn">📥 Feltöltés</button>
                     <input type="file" id="import-file" accept=".json" style="display: none;">
-                    <button id="export-btn" class="secondary-btn">💾 Adatok letöltése</button>
+                    <button id="export-btn" class="secondary-btn">💾 Letöltés</button>
                 </div>
             </div>
 
@@ -261,12 +272,12 @@
                     <thead>
                         <tr>
                             <th>Dátum</th>
-                            <th>Izomcsoport</th>
+                            <th>Izom</th>
                             <th>Gyakorlat</th>
-                            <th>Súly / Idő</th>
-                            <th>Ismétlés / Részletek</th>
+                            <th>Súly/Idő</th>
+                            <th>Ism.</th>
                             <th>Jegyzet</th>
-                            <th>Törlés</th>
+                            <th>🗑️</th>
                         </tr>
                     </thead>
                     <tbody id="workout-list"></tbody>
@@ -277,10 +288,10 @@
 
         <!-- ================= 3. NÉZET: TESTADATOK & MÉRETEK ================= -->
         <div id="view-body" class="app-view hidden">
-            <div class="template-card">
-                <h3>⚖️ Testsúly & Testméretek Naplózása</h3>
+            <div class="template-card" style="text-align: left;">
+                <h3 style="color: #00e676; margin-bottom: 10px;">⚖️ Testsúly & Testméretek</h3>
                 
-                <form id="body-form" style="text-align: left; margin-top: 15px;">
+                <form id="body-form">
                     <div class="form-group">
                         <label for="body-date">Dátum:</label>
                         <input type="date" id="body-date" required>
@@ -288,44 +299,44 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="body-weight">Testsúly (kg):</label>
-                            <input type="number" id="body-weight" placeholder="pl. 78.5" step="0.1">
+                            <label for="body-weight">Súly (kg):</label>
+                            <input type="number" id="body-weight" placeholder="78.5" step="0.1">
                         </div>
                         <div class="form-group">
-                            <label for="body-fat">Testzsír (%):</label>
-                            <input type="number" id="body-fat" placeholder="pl. 15.0" step="0.1">
+                            <label for="body-fat">Zsír (%):</label>
+                            <input type="number" id="body-fat" placeholder="15.0" step="0.1">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="body-chest">Mellkas (cm):</label>
-                            <input type="number" id="body-chest" placeholder="pl. 105" step="0.5">
+                            <input type="number" id="body-chest" placeholder="105" step="0.5">
                         </div>
                         <div class="form-group">
                             <label for="body-arm">Kar (cm):</label>
-                            <input type="number" id="body-arm" placeholder="pl. 38" step="0.5">
+                            <input type="number" id="body-arm" placeholder="38" step="0.5">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="body-waist">Derék (cm):</label>
-                            <input type="number" id="body-waist" placeholder="pl. 82" step="0.5">
+                            <input type="number" id="body-waist" placeholder="82" step="0.5">
                         </div>
                         <div class="form-group">
                             <label for="body-thigh">Comb (cm):</label>
-                            <input type="number" id="body-thigh" placeholder="pl. 58" step="0.5">
+                            <input type="number" id="body-thigh" placeholder="58" step="0.5">
                         </div>
                     </div>
 
-                    <button type="submit" id="save-body-btn" class="secondary-btn-full" style="background-color: #00e676; color: #000; border: none; font-weight: bold; margin-top: 10px;">💾 Testadatok Mentése</button>
+                    <button type="submit" id="save-body-btn" class="secondary-btn-full" style="background-color: #00e676; color: #000; border: none; font-weight: bold; margin-top: 10px;">💾 Mentés</button>
                 </form>
             </div>
 
-            <div class="template-card" style="margin-top: 20px;">
-                <h3>📋 Korábbi Testadatok</h3>
-                <div class="table-wrapper" style="margin-top: 10px; overflow-x: auto;">
+            <div class="template-card" style="margin-top: 20px; text-align: left;">
+                <h3 style="color: #00e676; margin-bottom: 10px;">📋 Korábbi Testadatok</h3>
+                <div class="table-wrapper" style="overflow-x: auto;">
                     <table>
                         <thead>
                             <tr>
@@ -336,7 +347,7 @@
                                 <th>Kar</th>
                                 <th>Derék</th>
                                 <th>Comb</th>
-                                <th>Törlés</th>
+                                <th>🗑️</th>
                             </tr>
                         </thead>
                         <tbody id="body-list"></tbody>
@@ -347,28 +358,26 @@
 
     </div> <!-- container vége -->
 
-    <!-- ================= NAPTÁR RÉSZLETEK MODÁL (FELUGRÓ) ABLAK ================= -->
+    <!-- ================= NAPTÁR RÉSZLETEK MODÁL ================= -->
     <div id="day-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-date-title" style="color: #00e676;">Edzés részletek</h3>
                 <button type="button" class="close-btn" onclick="closeDayModal()">✕ Bezárás</button>
             </div>
-            <div id="modal-body-content" class="modal-body">
-                <!-- Ide kerülnek dinamikusan az aznapi edzések -->
-            </div>
+            <div id="modal-body-content" class="modal-body"></div>
         </div>
     </div>
 
     <!-- ================= LENTI NAVIGÁCIÓS SÁV ================= -->
     <nav class="bottom-nav">
         <button type="button" class="nav-item active" onclick="switchTab('workout')">
-            <span class="nav-icon">🏋️‍♂️</span>
+            <span class="nav-icon">🏋️</span>
             <span class="nav-label">Edzés</span>
         </button>
         <button type="button" class="nav-item" onclick="switchTab('history')">
             <span class="nav-icon">📋</span>
-            <span class="nav-label">Előzmények & PR</span>
+            <span class="nav-label">Előzmények</span>
         </button>
         <button type="button" class="nav-item" onclick="switchTab('body')">
             <span class="nav-icon">⚖️</span>
