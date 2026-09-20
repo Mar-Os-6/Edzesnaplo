@@ -5,13 +5,11 @@ const muscleGroupSelect = document.getElementById('muscle-group');
 const quickExercisesContainer = document.getElementById('quick-exercises');
 const exerciseInput = document.getElementById('exercise');
 
-// SÚLYZÓS ÉS KARDIÓ CONTAINER-EK
 const resistanceFields = document.getElementById('resistance-fields');
 const setsContainer = document.getElementById('sets-container');
 const addSetBtn = document.getElementById('add-set-btn');
 const cardioFields = document.getElementById('cardio-fields');
 
-// KARDIÓ INPUTOK
 const cardioTimeInput = document.getElementById('cardio-time');
 const cardioInclineInput = document.getElementById('cardio-incline');
 const cardioSpeedInput = document.getElementById('cardio-speed');
@@ -24,10 +22,8 @@ const importBtn = document.getElementById('import-btn');
 const importFileInput = document.getElementById('import-file');
 const searchFilterInput = document.getElementById('search-filter');
 
-// Mai dátum beállítása
 dateInput.value = new Date().toISOString().split('T')[0];
 
-// ALAPÉRTELMEZETT GYAKORLATOK
 const defaultExercises = {
     'Mell': ['Fekvenyomás', 'Incline Fekvenyomás', 'Tárogatás'],
     'Bicepsz': ['Bicepsz állva franciarúddal', 'Kalapács hajlítás'],
@@ -39,7 +35,6 @@ const defaultExercises = {
     'Kardió': ['Futópad (Incline walking)', 'Lépcsőzőgép', 'Szobakerékpár']
 };
 
-// 1. INDULÁSKOR BETÖLTÉS
 document.addEventListener('DOMContentLoaded', () => {
     loadWorkouts();
     renderQuickExercises();
@@ -47,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
     resetSetRows();
 });
 
-// DINAMIKUS SOROZAT KEZELÉS A FORM-BAN
 addSetBtn.addEventListener('click', () => {
     addSetRow();
 });
@@ -98,7 +92,6 @@ function resetSetRows() {
     addSetRow();
 }
 
-// 2. IZOMCSOPORT VÁLTOZÁSKOR
 muscleGroupSelect.addEventListener('change', () => {
     exerciseInput.value = '';
     historyHint.textContent = '';
@@ -195,7 +188,6 @@ function checkPreviousWeight() {
     }
 }
 
-// 3. MENTÉS GOMB
 form.addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -253,7 +245,6 @@ form.addEventListener('submit', function(e) {
     loadWorkouts();
 });
 
-// 4. MEGJELENÍTÉS A TÁBLÁZATBAN PR 🏆 KIEMELÉSSEL
 function addWorkoutToTable(workout, totalSetsCount, currentSetNum, isPR) {
     const tr = document.createElement('tr');
     tr.setAttribute('data-id', workout.id);
@@ -301,12 +292,10 @@ function getWorkoutsFromStorage() {
     return localStorage.getItem('workouts') ? JSON.parse(localStorage.getItem('workouts')) : [];
 }
 
-// PR ÉS TÁBLÁZAT BETÖLTÉSI LOGIKA
 function loadWorkouts() {
     workoutList.innerHTML = '';
     const workouts = getWorkoutsFromStorage();
 
-    // Legnagyobb súlyok kiszámítása gyakorlatonként (PR)
     const maxWeights = {};
     workouts.forEach(w => {
         if (!w.isCardio) {
@@ -340,7 +329,6 @@ function loadWorkouts() {
             setIndexes[key] = (setIndexes[key] || 0) + 1;
             currentSetNum = setIndexes[key];
 
-            // PR ellenőrzés: ha a súly eléri a maximális valaha emelt súlyt (és > 0)
             const currentWeight = parseFloat(workout.weight) || 0;
             if (currentWeight > 0 && currentWeight === maxWeights[exName]) {
                 isPR = true;
@@ -358,7 +346,6 @@ function deleteWorkout(id) {
     loadWorkouts();
 }
 
-// EXPORTÁLÁS ÉS IMPORTÁLÁS KEZELÉSE
 exportBtn.addEventListener('click', function() {
     const workouts = getWorkoutsFromStorage();
     if (workouts.length === 0) {
@@ -387,10 +374,8 @@ importFileInput.addEventListener('change', function(e) {
         try {
             const importedData = JSON.parse(event.target.result);
             if (Array.isArray(importedData)) {
-                if (confirm(`Biztosan be akarod tölteni ezt a ${importedData.length} edzésbejegyzést? (Ez összefésüli a jelenlegi adataiddal)`)) {
+                if (confirm(`Biztosan be akarod tölteni ezt a ${importedData.length} edzésbejegyzést?`)) {
                     const currentWorkouts = getWorkoutsFromStorage();
-                    
-                    // Összefésülés duplikáció nélkül (id alapján)
                     const existingIds = new Set(currentWorkouts.map(w => w.id));
                     const newWorkouts = importedData.filter(w => !existingIds.has(w.id));
                     
@@ -408,7 +393,7 @@ importFileInput.addEventListener('change', function(e) {
         }
     };
     reader.readAsText(file);
-    this.value = ''; // Reset
+    this.value = '';
 });
 
 searchFilterInput.addEventListener('input', function() {
@@ -482,3 +467,12 @@ document.getElementById('start-timer-btn').addEventListener('click', function() 
 document.getElementById('reset-timer-btn').addEventListener('click', function() {
     setTimer(60);
 });
+
+// SERVICE WORKER REGISZTRÁCIÓ (PWA)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker sikeresen regisztrálva:', reg))
+            .catch(err => console.log('Service Worker hiba:', err));
+    });
+}
