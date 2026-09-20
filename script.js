@@ -46,7 +46,7 @@ const activeTemplateBanner = document.getElementById('active-template-banner');
 const activeTemplateInfo = document.getElementById('active-template-info');
 const cancelTemplateBtn = document.getElementById('cancel-template-btn');
 
-// PR, GRAFIKON, TESTADATOK & NAPTÁR ELEMEK
+// PR, GRAFIKON, TESTADATOK, NAPTÁR & MODÁL ELEMEK
 const prSummaryContainer = document.getElementById('pr-summary-container');
 const chartExerciseSelect = document.getElementById('chart-exercise-select');
 const chartContainer = document.getElementById('chart-container');
@@ -62,6 +62,9 @@ const bodyList = document.getElementById('body-list');
 
 const calendarDaysContainer = document.getElementById('calendar-days');
 const calendarMonthTitle = document.getElementById('calendar-month-title');
+const dayModal = document.getElementById('day-modal');
+const modalDateTitle = document.getElementById('modal-date-title');
+const modalBodyContent = document.getElementById('modal-body-content');
 
 dateInput.value = new Date().toISOString().split('T')[0];
 if (bodyDateInput) bodyDateInput.value = new Date().toISOString().split('T')[0];
@@ -139,7 +142,7 @@ function switchTab(viewName) {
     }
 }
 
-// --- EDZÉSNAPTÁR LOGIKA ---
+// --- EDZÉSNAPTÁR & MODÁL LOGIKA ---
 function renderCalendar() {
     calendarDaysContainer.innerHTML = '';
     const year = currentCalendarDate.getFullYear();
@@ -148,15 +151,19 @@ function renderCalendar() {
     const monthNames = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
     calendarMonthTitle.textContent = `${monthNames[month]} ${year}`;
 
-    // Hányadik napon kezdődik a hónap (Hétfő az 1)
     let firstDayIndex = new Date(year, month, 1).getDay();
-    firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // Vasárnap átrakása 6-ra
+    firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
 
     const totalDays = new Date(year, month + 1, 0).getDate();
     const workouts = getWorkoutsFromStorage();
-    const workoutDates = new Set(workouts.map(w => w.date));
+    
+    // Gyűjtsük ki, hogy melyik napon milyen edzések voltak
+    const workoutsByDate = {};
+    workouts.forEach(w => {
+        if (!workoutsByDate[w.date]) workoutsByDate[w.date] = [];
+        workoutsByDate[w.date].push(w);
+    });
 
-    // Üres mezők a hónap kezdete előtt
     for (let i = 0; i < firstDayIndex; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = 'calendar-day empty';
@@ -165,7 +172,6 @@ function renderCalendar() {
 
     const todayStr = new Date().toISOString().split('T')[0];
 
-    // Hónap napjai
     for (let day = 1; day <= totalDays; day++) {
         const cellDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const cell = document.createElement('div');
@@ -176,13 +182,9 @@ function renderCalendar() {
             cell.classList.add('today');
         }
 
-        if (workoutDates.has(cellDate)) {
+        if (workoutsByDate[cellDate]) {
             cell.classList.add('has-workout');
-            cell.title = "Volt ezen a napon edzés!";
-            cell.onclick = () => {
-                searchFilterInput.value = cellDate;
-                filterWorkoutsTable();
-            };
+            cell.onclick = () => openDayModal(cellDate, workoutsByDate[cellDate]);
         }
 
         calendarDaysContainer.appendChild(cell);
@@ -193,6 +195,41 @@ function changeMonth(direction) {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
     renderCalendar();
 }
+
+function openDayModal(dateStr, dayWorkouts) {
+    modalDateTitle.textContent = `📅 ${dateStr} összefoglaló`;
+    modalBodyContent.innerHTML = '';
+
+    dayWorkouts.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'modal-workout-item';
+        
+        let details = '';
+        if (w.isCardio) {
+            details = `⏱️ ${w.time || '0'} perc (${w.incline || '-'}, ${w.speed ? w.speed + ' km/h' : '-'})`;
+        } else {
+            details = `💪 ${w.weight} kg x ${w.reps} ismétlés`;
+        }
+
+        div.innerHTML = `
+            <div style="font-weight: bold; color: #00e676; margin-bottom: 2px;">${w.exercise} <small style="color:#aaa;">(${w.muscleGroup || '-'})</small></div>
+            <div>${details}</div>
+            ${w.note ? `<div style="color: #bbb; font-style: italic; font-size: 0.78rem; margin-top: 4px;">Jegyzet: ${w.note}</div>` : ''}
+        `;
+        modalBodyContent.appendChild(div);
+    });
+
+    dayModal.classList.remove('hidden');
+}
+
+function closeDayModal() {
+    dayModal.classList.add('hidden');
+}
+
+// Bezárás ha a modál háttérre kattintanak
+window.addEventListener('click', (e) => {
+    if (e.target === dayModal) closeDayModal();
+});
 
 // --- IZOMCSOPORT SZŰRŐ AZ ELŐZMÉNYEKHEZ ---
 function filterHistoryByMuscle(muscleGroup, chipElement) {
@@ -798,7 +835,6 @@ function loadWorkouts() {
 
     const setIndexes = {};
     workouts.forEach(workout => {
-        // Szűrés ellenőrzése
         if (currentMuscleFilter !== 'Összes' && workout.muscleGroup !== currentMuscleFilter) {
             return;
         }
