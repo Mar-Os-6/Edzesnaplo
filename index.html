@@ -19,20 +19,57 @@
     <div class="container">
         <h1>🏋️‍♂️ Edzésnapló</h1>
 
-        <!-- 1. PIHENŐIDŐ IDŐZÍTŐ -->
-        <div class="timer-card">
-            <h3>⏱️ Pihenőidő Stopper</h3>
-            <div id="timer-display">01:00</div>
-            <div class="timer-buttons">
-                <button type="button" class="timer-btn" onclick="setTimer(60)">60 mp</button>
-                <button type="button" class="timer-btn" onclick="setTimer(90)">90 mp</button>
-                <button type="button" class="timer-btn" onclick="setTimer(120)">120 mp</button>
+        <!-- 1. ÖSSZECSUKHATÓ IDŐZÍTŐ ÉS STOPPER -->
+        <details class="timer-accordion">
+            <summary class="timer-summary">
+                <span>⏱️ Időzítő & Stopperóra</span>
+                <span class="chevron">▼</span>
+            </summary>
+            <div class="timer-content">
+                <!-- Módválasztó fülek -->
+                <div class="timer-tabs">
+                    <button type="button" id="tab-stopwatch" class="tab-btn active" onclick="switchTimerTab('stopwatch')">Stopper (Felfelé)</button>
+                    <button type="button" id="tab-countdown" class="tab-btn" onclick="switchTimerTab('countdown')">Időzítő (Lefelé)</button>
+                </div>
+
+                <!-- 1. STOPPERÓRA -->
+                <div id="stopwatch-view" class="timer-view">
+                    <div id="stopwatch-display" class="timer-display">00:00:00</div>
+                    <div class="timer-controls">
+                        <button type="button" id="sw-start-btn" class="primary-timer-btn" onclick="toggleStopwatch()">Indítás</button>
+                        <button type="button" class="secondary-timer-btn" onclick="resetStopwatch()">Nullázás</button>
+                    </div>
+                </div>
+
+                <!-- 2. VISSZASZÁMLÁLÓ IDŐZÍTŐ -->
+                <div id="countdown-view" class="timer-view hidden">
+                    <div id="countdown-display" class="timer-display">01:00</div>
+                    
+                    <div class="countdown-inputs">
+                        <div class="input-group-time">
+                            <input type="number" id="cd-minutes" value="1" min="0" max="999">
+                            <label>perc</label>
+                        </div>
+                        <div class="input-group-time">
+                            <input type="number" id="cd-seconds" value="0" min="0" max="59">
+                            <label>mp</label>
+                        </div>
+                    </div>
+
+                    <div class="preset-btns">
+                        <button type="button" onclick="setCountdownPreset(30)">30s</button>
+                        <button type="button" onclick="setCountdownPreset(60)">1p</button>
+                        <button type="button" onclick="setCountdownPreset(120)">2p</button>
+                        <button type="button" onclick="setCountdownPreset(300)">5p</button>
+                    </div>
+
+                    <div class="timer-controls">
+                        <button type="button" id="cd-start-btn" class="primary-timer-btn" onclick="toggleCountdown()">Indítás</button>
+                        <button type="button" class="secondary-timer-btn" onclick="resetCountdown()">Nullázás</button>
+                    </div>
+                </div>
             </div>
-            <div class="timer-controls">
-                <button type="button" id="start-timer-btn">Start / Szünet</button>
-                <button type="button" id="reset-timer-btn">Visszaállítás</button>
-            </div>
-        </div>
+        </details>
 
         <!-- 2. EDZÉSTERV SABLONOK KÁRTYA -->
         <div class="template-card">
