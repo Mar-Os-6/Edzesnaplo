@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edzesnaplo-v3';
+const CACHE_NAME = 'edzesnaplo-auto';
 const ASSETS = [
     './',
     './index.html',
@@ -17,7 +17,7 @@ self.addEventListener('install', (e) => {
     self.skipWaiting();
 });
 
-// 2. AKTIVÁLÁS - Régi gyorsítótár azonnali törlése
+// 2. AKTIVÁLÁS - Régi cache azonnali törlése
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keys) => {
@@ -33,19 +33,18 @@ self.addEventListener('activate', (e) => {
     self.clients.claim();
 });
 
-// 3. KÉRÉSEK ELCSÍPÉSE - Hálózat először, offline esetén cache
+// 3. KÉRÉSEK ELCSÍPÉSE (Network First a frissüléshez)
 self.addEventListener('fetch', (e) => {
+    // Ha az sw.js-t vagy a főoldalt kéri, azt mindig a hálózatról próbáljuk legelőször
     e.respondWith(
         fetch(e.request)
             .then((networkResponse) => {
-                // Ha van net, frissítjük a cache-t a legújabbal a háttérben
                 return caches.open(CACHE_NAME).then((cache) => {
                     cache.put(e.request, networkResponse.clone());
                     return networkResponse;
                 });
             })
             .catch(() => {
-                // Ha nincs net (offline vagyunk), adjuk a mentett cache-t
                 return caches.match(e.request);
             })
     );
