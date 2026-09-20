@@ -197,9 +197,9 @@
             <!-- EDZÉSNAPTÁR KÁRTYA -->
             <div class="template-card" style="margin-bottom: 15px;">
                 <div class="calendar-header">
-                    <button type="button" class="secondary-btn" onclick="changeMonth(-1)">◀ Előző</button>
-                    <h3 id="calendar-month-title" style="margin: 0; color: #00e676;">Naptár</h3>
-                    <button type="button" class="secondary-btn" onclick="changeMonth(1)">Következő ▶</button>
+                    <button type="button" class="cal-nav-btn" onclick="changeMonth(-1)">◀</button>
+                    <h3 id="calendar-month-title" style="margin: 0; color: #00e676; font-size: 0.95rem;">Naptár</h3>
+                    <button type="button" class="cal-nav-btn" onclick="changeMonth(1)">▶</button>
                 </div>
                 <div class="calendar-grid-header">
                     <span>H</span><span>K</span><span>Sz</span><span>Cs</span><span>P</span><span>Sz</span><span>V</span>
@@ -346,6 +346,19 @@
         </div>
 
     </div> <!-- container vége -->
+
+    <!-- ================= NAPTÁR RÉSZLETEK MODÁL (FELUGRÓ) ABLAK ================= -->
+    <div id="day-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-date-title" style="color: #00e676;">Edzés részletek</h3>
+                <button type="button" class="close-btn" onclick="closeDayModal()">✕ Bezárás</button>
+            </div>
+            <div id="modal-body-content" class="modal-body">
+                <!-- Ide kerülnek dinamikusan az aznapi edzések -->
+            </div>
+        </div>
+    </div>
 
     <!-- ================= LENTI NAVIGÁCIÓS SÁV ================= -->
     <nav class="bottom-nav">
