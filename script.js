@@ -9,13 +9,13 @@ const historyHint = document.getElementById('history-hint');
 const workoutList = document.getElementById('workout-list');
 const exportBtn = document.getElementById('export-btn');
 
-// A mai dátum automatikus beállítása a dátummezőbe
+// A mai dátum automatikus beállítása
 dateInput.value = new Date().toISOString().split('T')[0];
 
 // 1. ADATOK BETÖLTÉSE INDULÁSKOR
 document.addEventListener('DOMContentLoaded', loadWorkouts);
 
-// 2. ELŐZŐ SÚLY JAVASLATA AMIKOR BEÍROD A GYAKORLAT NEVÉT
+// 2. ELŐZŐ SÚLY JAVASLATA BEÍRÁSKOR
 exerciseInput.addEventListener('input', function() {
     const query = exerciseInput.value.trim().toLowerCase();
     if (!query) {
@@ -24,7 +24,6 @@ exerciseInput.addEventListener('input', function() {
     }
     
     const workouts = getWorkoutsFromStorage();
-    // Megkeressük az utolsó olyan edzést, ahol ez a gyakorlat szerepelt
     const previous = workouts.slice().reverse().find(w => w.exercise.toLowerCase() === query);
     
     if (previous) {
@@ -34,20 +33,19 @@ exerciseInput.addEventListener('input', function() {
     }
 });
 
-// 3. MENTÉS GOMB MEGNYOMÁSA (ŰRLAP BEKÜLDÉSE)
+// 3. MENTÉS GOMB MEGNYOMÁSA
 form.addEventListener('submit', function(e) {
-    e.preventDefault(); // Megakadályozza, hogy az oldal újratöltődjön
+    e.preventDefault();
 
     const workouts = getWorkoutsFromStorage();
     
-    // Kiszámoljuk, hányadik sorozat ez az adott napon ebből a gyakorlatból
     const currentDate = dateInput.value;
     const currentExercise = exerciseInput.value.trim();
     const existingSets = workouts.filter(w => w.date === currentDate && w.exercise.toLowerCase() === currentExercise.toLowerCase());
     const setNumber = existingSets.length + 1;
 
     const workout = {
-        id: Date.now(), // Egyedi azonosító a pontos idő alapján
+        id: Date.now(),
         date: currentDate,
         exercise: currentExercise,
         setNumber: setNumber,
@@ -59,7 +57,6 @@ form.addEventListener('submit', function(e) {
     addWorkoutToTable(workout);
     saveWorkoutToStorage(workout);
 
-    // Mezők ürítése (a dátumot és gyakorlatnevet meghagyjuk a gyorsabb folytatáshoz)
     weightInput.value = '';
     repsInput.value = '';
     noteInput.value = '';
@@ -73,18 +70,17 @@ function addWorkoutToTable(workout) {
 
     tr.innerHTML = `
         <td>${workout.date}</td>
-        <td><strong>${workout.exercise}</strong> <small>(${workout.setNumber}. sorozat)</small></td>
+        <td><strong>${workout.exercise}</strong> <small>(${workout.setNumber}. soroz)</small></td>
         <td>${workout.weight} kg</td>
         <td>${workout.reps}x</td>
         <td>${workout.note || '-'}</td>
         <td><button class="delete-btn" onclick="deleteWorkout(${workout.id})">X</button></td>
     `;
 
-    // A legújabb bejegyzés kerüljön legfelülre
     workoutList.insertBefore(tr, workoutList.firstChild);
 }
 
-// 5. TÁROLÁS A BÖNGÉSZŐ MEMÓRIÁJÁBAN (localStorage)
+// 5. TÁROLÁS
 function saveWorkoutToStorage(workout) {
     let workouts = getWorkoutsFromStorage();
     workouts.push(workout);
@@ -109,7 +105,7 @@ function deleteWorkout(id) {
     localStorage.setItem('workouts', JSON.stringify(workouts));
 }
 
-// 6. ADATOK EXPORTÁLÁSA/LETÖLTÉSE (BIZTONSÁGI MENTÉS)
+// 6. ADATOK EXPORTÁLÁSA
 exportBtn.addEventListener('click', function() {
     const workouts = getWorkoutsFromStorage();
     if (workouts.length === 0) {
@@ -125,9 +121,9 @@ exportBtn.addEventListener('click', function() {
     downloadAnchor.remove();
 });
 
-// 7. KÜLÖNÁLLÓ STOPPER / IDŐZÍTŐ LOGIKA
+// 7. KÜLÖNÁLLÓ STOPPER LOGIKA (ALAPÉRTELMEZETTEN 60 MP)
 let timerInterval = null;
-let secondsLeft = 90; // Alapértelmezett 90 mp
+let secondsLeft = 60; // 1 percre módosítva
 let isTimerRunning = false;
 
 function updateTimerDisplay() {
@@ -147,12 +143,10 @@ function setTimer(seconds) {
 
 document.getElementById('start-timer-btn').addEventListener('click', function() {
     if (isTimerRunning) {
-        // Ha fut, leállítjuk (Szünet)
         clearInterval(timerInterval);
         isTimerRunning = false;
         this.textContent = 'Start';
     } else {
-        // Ha áll, elindítjuk
         isTimerRunning = true;
         this.textContent = 'Szünet';
         timerInterval = setInterval(() => {
@@ -165,10 +159,10 @@ document.getElementById('start-timer-btn').addEventListener('click', function() 
                 document.getElementById('start-timer-btn').textContent = 'Start';
                 alert('⏱️ Lejárt a pihenőidő!');
             }
-        }, 1000); // 1000 ms = 1 másodpercenként fut le
+        }, 1000);
     }
 });
 
 document.getElementById('reset-timer-btn').addEventListener('click', function() {
-    setTimer(90); // Alaphelyzetre állít
+    setTimer(60); // Visszaállítás 1 percre
 });
