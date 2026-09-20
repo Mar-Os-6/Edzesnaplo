@@ -1,311 +1,171 @@
-/* ================= EREDETI DIZÁJN + ÚJ LENTI MENÜ ================= */
 * {
     box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
     background-color: #121212;
-    color: #e0e0e0;
-    padding: 10px;
-    padding-bottom: 90px; /* Hogy a lenti fix sáv ne takarja ki a tartalmat */
-    display: flex;
-    justify-content: center;
+    color: #ffffff;
+    padding: 15px;
+    padding-bottom: 90px;
 }
 
 .container {
-    width: 100%;
-    max-width: 480px;
+    max-width: 500px;
     margin: 0 auto;
 }
 
-/* FŐCÍM */
 h1 {
-    font-size: 1.4rem;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #ffffff;
-}
-
-/* EREDETI KÁRTYÁK ÉS ELEMEK */
-.template-card, #workout-form, .timer-accordion {
-    background-color: #1e1e1e;
-    border: 1px solid #2a2a2a;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.template-card h3 {
-    font-size: 1rem;
-    color: #00e676;
-    margin-bottom: 10px;
-}
-
-/* IDŐZÍTŐ */
-.timer-accordion summary {
-    list-style: none;
-    cursor: pointer;
-    font-weight: bold;
-    color: #00e676;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.timer-accordion summary::-webkit-details-marker { display: none; }
-.timer-content {
-    margin-top: 10px;
-    border-top: 1px solid #2a2a2a;
-    padding-top: 10px;
-}
-
-.timer-tabs {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 10px;
-}
-.tab-btn {
-    flex: 1;
-    background: #2a2a2a;
-    border: none;
-    color: #aaa;
-    padding: 6px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    cursor: pointer;
-}
-.tab-btn.active {
-    background: #00e676;
-    color: #121212;
-    font-weight: bold;
-}
-
-.timer-display {
-    font-size: 2rem;
-    font-weight: bold;
     text-align: center;
-    margin: 10px 0;
-    color: #fff;
-}
-
-.timer-controls, .btn-group {
-    display: flex;
-    gap: 6px;
-}
-
-.primary-timer-btn, #save-btn {
-    flex: 2;
-    background-color: #00e676;
-    color: #121212;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.secondary-timer-btn, .secondary-btn {
-    flex: 1;
-    background-color: #2a2a2a;
-    color: #fff;
-    border: none;
-    padding: 8px 10px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    cursor: pointer;
-}
-
-/* ŰRLAPOK ÉS MEZŐK */
-.form-group {
-    margin-bottom: 12px;
-}
-.form-group label {
-    display: block;
-    font-size: 0.8rem;
-    color: #aaa;
-    margin-bottom: 4px;
-}
-
-input[type="text"], input[type="date"], input[type="number"], select {
-    width: 100%;
-    background-color: #121212;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 10px;
-    color: #fff;
-    font-size: 0.9rem;
-    outline: none;
-}
-input:focus, select:focus {
-    border-color: #00e676;
-}
-
-.form-row {
-    display: flex;
-    gap: 8px;
-}
-.form-row .form-group {
-    flex: 1;
-}
-
-/* CHIPEK */
-.chip-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 5px;
-}
-.chip {
-    background-color: #2a2a2a;
-    color: #ccc;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    user-select: none;
-}
-.chip.active {
-    background-color: #00e676;
-    color: #121212;
-    font-weight: bold;
-}
-
-/* SOROZATOK ÉS TÁBLÁZATOK */
-.set-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 6px;
-    background: #121212;
-    padding: 6px 10px;
-    border-radius: 8px;
-}
-.set-row span {
-    font-size: 0.8rem;
-    color: #aaa;
-    min-width: 20px;
-}
-.set-row input {
-    text-align: center;
-    padding: 6px;
-}
-.del-set-btn, .close-btn {
-    background: transparent;
-    border: none;
-    color: #ff5252;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.secondary-btn-full {
-    width: 100%;
-    background-color: #2a2a2a;
+    margin-bottom: 15px;
     color: #00e676;
-    border: 1px dashed #00e676;
-    padding: 8px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 0.8rem;
-    cursor: pointer;
-    margin-top: 5px;
 }
 
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 8px;
-    border: 1px solid #2a2a2a;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 0.8rem;
-}
-th {
-    background-color: #252525;
-    color: #00e676;
-    padding: 8px;
-}
-td {
-    padding: 8px;
-    border-top: 1px solid #2a2a2a;
+h2 {
+    font-size: 1.1rem;
 }
 
-/* NAPTÁR ÉS GRAFIKONOK */
+.hidden {
+    display: none !important;
+}
+
+/* NAPTÁR STÍLUS ÉS KICSI GOMBOK */
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    padding: 0 5px;
 }
+
 .cal-nav-btn {
-    background: #2a2a2a;
-    border: none;
-    color: #fff;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #00e676;
+    padding: 4px 10px;
+    border-radius: 6px;
     cursor: pointer;
+    font-weight: bold;
+    font-size: 0.8rem;
+    transition: background-color 0.2s ease;
 }
-.calendar-grid-header, .calendar-grid {
+
+.cal-nav-btn:hover {
+    background-color: #333;
+}
+
+.calendar-grid-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
-    gap: 3px;
-}
-.calendar-grid-header span {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: #888;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
 .calendar-day {
     aspect-ratio: 1;
-    background: #121212;
+    background-color: #252525;
     border-radius: 6px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     font-size: 0.8rem;
-    cursor: pointer;
+    color: #ccc;
     position: relative;
-}
-.calendar-day.has-workout::after {
-    content: '';
-    position: absolute;
-    bottom: 3px;
-    width: 4px;
-    height: 4px;
-    background-color: #00e676;
-    border-radius: 50%;
-}
-.calendar-day.empty {
-    background: transparent;
     cursor: default;
+    transition: transform 0.1s ease;
 }
 
-.chart-box, .pr-summary-box {
-    background: #121212;
-    border-radius: 8px;
+.calendar-day.empty {
+    background-color: transparent;
+}
+
+.calendar-day.has-workout {
+    background-color: #1b382b;
+    border: 1px solid #00e676;
+    color: #00e676;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.calendar-day.has-workout:hover {
+    transform: scale(1.05);
+}
+
+.calendar-day.today {
+    border: 2px dashed #00e676;
+}
+
+/* MODÁL (FELUGRÓ) ABLAK STÍLUS */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 15px;
+}
+
+.modal-content {
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.85rem;
+}
+
+.modal-workout-item {
+    background-color: #252525;
     padding: 10px;
-    min-height: 70px;
-    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    border-left: 4px solid #00e676;
 }
 
-/* ================= AZ ÚJ, TETTSZŐ LENTI MENÜ STÍLUS ================= */
+/* ================= AZ ÚJ, LEBEGŐ LENTI MENÜ STÍLUS ================= */
 .bottom-nav {
     position: fixed;
     bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 24px);
-    max-width: 456px;
-    background-color: rgba(30, 30, 30, 0.85);
+    max-width: 476px;
+    background-color: rgba(24, 24, 24, 0.9);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -318,29 +178,573 @@ td {
 }
 
 .nav-item {
-    background: transparent;
+    background: none;
     border: none;
+    color: #888;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
     cursor: pointer;
-    opacity: 0.5;
+    flex: 1;
+    font-size: 0.7rem;
+    gap: 3px;
+    opacity: 0.6;
     transition: opacity 0.2s;
 }
-.nav-item.active {
-    opacity: 1;
-}
-.nav-icon {
+
+.nav-item .nav-icon {
     font-size: 1.2rem;
 }
-.nav-label {
-    font-size: 0.7rem;
-    color: #ffffff;
-    font-weight: 500;
+
+.nav-item.active {
+    color: #00e676;
+    font-weight: bold;
+    opacity: 1;
 }
 
-/* EGYÉB SEGÉD */
-.hidden { display: none !important; }
-.danger-text { color: #ff5252 !important; }
-.hint { display: block; font-size: 0.75rem; color: #888; margin-top: 3px; }
+/* PR & GRAFIKON DOBOZOK STÍLUSA */
+.pr-summary-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.pr-item {
+    display: flex;
+    justify-content: space-between;
+    background-color: #252525;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.chart-box {
+    background-color: #181818;
+    padding: 12px;
+    border-radius: 8px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    text-align: left;
+}
+
+.chart-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+}
+
+.chart-bar-bg {
+    flex: 1;
+    background-color: #2a2a2a;
+    border-radius: 4px;
+    height: 14px;
+    overflow: hidden;
+}
+
+.chart-bar-fill {
+    background-color: #00e676;
+    height: 100%;
+    border-radius: 4px;
+    text-align: right;
+    padding-right: 4px;
+    color: #000;
+    font-weight: bold;
+    font-size: 0.7rem;
+}
+
+/* ÖSSZECSUKHATÓ KÁRTYA STÍLUS (STOPPER/IDŐZÍTŐ) */
+.timer-accordion {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.timer-summary {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #00e676;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #252525;
+    transition: background-color 0.2s ease;
+}
+
+.timer-summary:hover {
+    background-color: #2a2a2a;
+}
+
+.timer-summary::-webkit-details-marker {
+    display: none;
+}
+
+.chevron {
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+    color: #aaa;
+}
+
+.timer-accordion[open] .chevron {
+    transform: rotate(180deg);
+    color: #00e676;
+}
+
+.timer-content {
+    padding: 15px;
+    text-align: center;
+}
+
+/* FÜLEK */
+.timer-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    background-color: #121212;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 8px;
+    background-color: transparent;
+    border: none;
+    color: #aaa;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background-color: #2a2a2a;
+    color: #00e676;
+}
+
+/* KIJELZŐ ÉS VEZÉRLŐK */
+.timer-display {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #00e676;
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 2px;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.primary-timer-btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    background-color: #00e676;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.secondary-timer-btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background-color: #2a2a2a;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* IDŐZÍTŐ BEMENETEK ÉS GYORSGOMBOK */
+.countdown-inputs {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.input-group-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.input-group-time input {
+    width: 65px;
+    height: 40px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.input-group-time label {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin: 0;
+}
+
+.preset-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.preset-btns button {
+    padding: 6px 12px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #ccc;
+    border-radius: 16px;
+    font-size: 0.78rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preset-btns button:hover {
+    color: #00e676;
+    border-color: #00e676;
+}
+
+/* Sablon kártyák stílusa */
+.template-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.template-card h3 {
+    font-size: 1rem;
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+.active-banner {
+    background-color: #1b382b;
+    border: 1px solid #00e676;
+    color: #00e676;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-btn {
+    background-color: #ff5252;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.create-box {
+    background-color: #252525;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    text-align: left;
+}
+
+.create-box h4 {
+    margin-bottom: 8px;
+    color: #00e676;
+    font-size: 0.95rem;
+}
+
+.danger-text {
+    color: #ff5252 !important;
+}
+
+.input-with-btn {
+    display: flex;
+    gap: 8px;
+}
+
+.input-with-btn input {
+    flex: 1;
+}
+
+.input-with-btn button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.selected-ex-box {
+    background-color: #1a1a1a;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px dashed #444;
+    min-height: 40px;
+}
+
+/* Űrlap elemek */
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-row {
+    display: flex;
+    gap: 10px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.section-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #00e676;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+input, select, input[type="date"] {
+    width: 100%;
+    height: 46px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background-color: #1e1e1e;
+    color: #fff;
+    font-size: 16px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+}
+
+select {
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="292.4" height="292.4" viewBox="0 0 292.4 292.4"><path fill="%2300e676" d="M287 69.4a17.6 17.6 0 0 0-13-5.4H18.4c-5 0-9.3 1.8-12.9 5.4A17.6 17.6 0 0 0 0 82.2c0 5 1.8 9.3 5.4 12.9l128 127.9c3.6 3.6 7.8 5.4 12.8 5.4s9.2-1.8 12.8-5.4L287 95c3.5-3.5 5.4-7.8 5.4-12.8 0-5-1.9-9.2-5.4-12.8z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px top 50%;
+    background-size: 12px auto;
+    padding-right: 32px;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #00e676;
+}
+
+/* SOROZATOK STÍLUSAI */
+.set-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.set-number {
+    font-weight: bold;
+    color: #00e676;
+    min-width: 22px;
+    font-size: 0.95rem;
+}
+
+.set-row input {
+    flex: 1;
+    height: 44px;
+}
+
+.remove-set-btn {
+    background-color: #ff5252;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 44px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.secondary-btn-full {
+    width: 100%;
+    padding: 12px;
+    background-color: #1e1e1e;
+    color: #00e676;
+    border: 1px dashed #00e676;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 6px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Chipek */
+.chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 5px;
+    min-height: 35px;
+}
+
+.chip {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.chip.active {
+    background-color: #1b382b;
+    border-color: #00e676;
+    color: #00e676;
+    font-weight: bold;
+}
+
+.chip.selected-chip {
+    background-color: #00e676;
+    color: #000;
+    font-weight: bold;
+}
+
+.chip .delete-chip {
+    color: #ff5252;
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 0 2px;
+}
+
+.hint {
+    color: #00e676;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: block;
+}
+
+button#save-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #00e676;
+    color: #000;
+    font-weight: bold;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.action-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 6px;
+}
+
+.secondary-btn {
+    flex: 1;
+    background-color: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.pr-badge {
+    background-color: #ffd700;
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-left: 4px;
+    display: inline-block;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #2a2a2a;
+    font-size: 0.85rem;
+}
+
+th {
+    background-color: #252525;
+    color: #888;
+}
+
+.delete-btn {
+    background-color: #ff5252;
+    color: white;
+    border: none;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
