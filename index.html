@@ -8,25 +8,19 @@
 </head>
 <body>
     <div class="container">
-        <!-- CÍMSOR -->
-        <header class="app-header">
-            <h1>💪 Edzés Napló</h1>
-            <p class="subtitle">Kövesd a fejlődésed napról napra</p>
-        </header>
+        <h1>Edzés Napló</h1>
 
         <!-- ÖSSZECSUKHATÓ IDŐZÍTŐ ÉS STOPPER -->
         <details class="timer-accordion">
-            <summary class="timer-summary">
-                <span>⏱️ Időzítő & Stopperóra</span>
-                <span class="chevron">▼</span>
-            </summary>
+            <summary class="timer-summary">⏱️ Időzítő & Stopperóra</summary>
             <div class="timer-content">
+                <!-- Módválasztó fülek -->
                 <div class="timer-tabs">
                     <button type="button" id="tab-stopwatch" class="tab-btn active" onclick="switchTimerTab('stopwatch')">Stopper (Felfelé)</button>
                     <button type="button" id="tab-countdown" class="tab-btn" onclick="switchTimerTab('countdown')">Időzítő (Lefelé)</button>
                 </div>
 
-                <!-- STOPPERÓRA -->
+                <!-- 1. STOPPERÓRA -->
                 <div id="stopwatch-view" class="timer-view">
                     <div id="stopwatch-display" class="timer-display">00:00:00</div>
                     <div class="timer-controls">
@@ -35,10 +29,11 @@
                     </div>
                 </div>
 
-                <!-- IDŐZÍTŐ -->
+                <!-- 2. VISSZASZÁMLÁLÓ IDŐZÍTŐ -->
                 <div id="countdown-view" class="timer-view hidden">
                     <div id="countdown-display" class="timer-display">01:00</div>
                     
+                    <!-- Egyéni idő megadása -->
                     <div class="countdown-inputs">
                         <div class="input-group-time">
                             <input type="number" id="cd-minutes" value="1" min="0" max="999">
@@ -46,10 +41,11 @@
                         </div>
                         <div class="input-group-time">
                             <input type="number" id="cd-seconds" value="0" min="0" max="59">
-                            <label>mp</label>
+                            <label>másodperc</label>
                         </div>
                     </div>
 
+                    <!-- Gyorsgombok -->
                     <div class="preset-btns">
                         <button type="button" onclick="setCountdownPreset(30)">30s</button>
                         <button type="button" onclick="setCountdownPreset(60)">1p</button>
@@ -66,7 +62,7 @@
         </details>
 
         <!-- SABLON KÁRTYA -->
-        <div class="card template-card">
+        <div class="template-card">
             <h3>🏋️ Edzéssablonok</h3>
             <div id="active-template-banner" class="active-banner hidden">
                 <span id="active-template-name"></span>
@@ -75,45 +71,25 @@
             <div class="form-group">
                 <label for="template-select">Sablon betöltése:</label>
                 <select id="template-select" onchange="loadSelectedTemplate()">
-                    <option value="">-- Válassz sablonok közül --</option>
+                    <option value="">-- Válassz sablont --</option>
                 </select>
             </div>
             <button type="button" class="secondary-btn-full" onclick="toggleCreateTemplateBox()">+ Új sablon létrehozása</button>
             
-            <!-- UJ SABLON CREATION BOX (Javítva: Szűrő és Mégse gomb) -->
             <div id="create-template-box" class="create-box hidden">
                 <h4>Új sablon mentése</h4>
                 <div class="form-group">
                     <input type="text" id="new-template-name" placeholder="Sablon neve (pl. Mell-Bicepsz)">
                 </div>
-
-                <div class="form-group">
-                    <label for="template-category-filter">Izomcsoport szűrés:</label>
-                    <select id="template-category-filter" onchange="renderTemplateChips()">
-                        <option value="Összes">Összes</option>
-                        <option value="Mell">Mell</option>
-                        <option value="Hát">Hát</option>
-                        <option value="Láb">Láb</option>
-                        <option value="Váll">Váll</option>
-                        <option value="Kar">Kar</option>
-                        <option value="Has">Has</option>
-                        <option value="Kardió">Kardió</option>
-                    </select>
-                </div>
-
                 <label>Gyakorlatok kiválasztása:</label>
                 <div id="template-exercise-chips" class="chip-container"></div>
                 <div class="selected-ex-box" id="selected-template-exercises-text">Nincs kiválasztva gyakorlat.</div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 12px;">
-                    <button type="button" id="save-template-btn" class="primary-timer-btn" style="flex: 1;" onclick="saveNewTemplate()">Sablon Mentése</button>
-                    <button type="button" class="secondary-timer-btn" onclick="toggleCreateTemplateBox()">Mégse</button>
-                </div>
+                <button type="button" id="save-template-btn" class="primary-timer-btn" style="width: 100%; margin-top: 10px;" onclick="saveNewTemplate()">Sablon Mentése</button>
             </div>
         </div>
 
         <!-- EDZÉS RÖGZÍTÉSE ÚRLAP -->
-        <form id="workout-form" class="card">
+        <form id="workout-form">
             <div class="form-row">
                 <div class="form-group">
                     <label for="date">Dátum:</label>
@@ -142,11 +118,13 @@
                 </select>
             </div>
 
+            <!-- Gyakorlat gombok (Chipek) -->
             <div class="form-group">
                 <label>Gyorsválasztó csempék:</label>
                 <div id="exercise-chips" class="chip-container"></div>
             </div>
 
+            <!-- Új gyakorlat hozzáadása -->
             <div class="form-group">
                 <div class="input-with-btn">
                     <input type="text" id="custom-exercise-input" placeholder="Új gyakorlat neve">
@@ -168,23 +146,24 @@
         <div class="action-header">
             <h2>Előző edzések</h2>
             <div class="btn-group">
-                <button type="button" class="secondary-btn" onclick="exportData()">Export</button>
-                <button type="button" class="secondary-btn" onclick="triggerImport()">Import</button>
+                <button type="button" class="secondary-btn" onclick="exportData()">Exportálás</button>
+                <button type="button" class="secondary-btn" onclick="triggerImport()">Importálás</button>
                 <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
             </div>
         </div>
 
-        <div class="table-wrapper card">
+        <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
                         <th>Dátum</th>
                         <th>Gyakorlat</th>
-                        <th>Sorozatok</th>
-                        <th>Művelet</th>
+                        <th>Sorozatok (kg x ismétlés)</th>
+                        <th>Műveletek</th>
                     </tr>
                 </thead>
                 <tbody id="workout-history-body">
+                    <!-- Dinamikus edzés előzmények -->
                 </tbody>
             </table>
         </div>
