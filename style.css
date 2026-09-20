@@ -254,7 +254,7 @@ input:focus, select:focus {
     background-color: #2a2a2a;
 }
 
-/* CHIPEK (VISSZAÁLLÍTVA A KORÁBBI STÍLUSRA) */
+/* Chipek (Kijelölhető gombok) */
 .chip-container {
     display: flex;
     flex-wrap: wrap;
