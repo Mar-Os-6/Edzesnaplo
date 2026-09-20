@@ -78,11 +78,11 @@ const defaultTemplates = [
 ];
 
 // SABLON LÉTREHOZÓ / SZERKESZTŐ BELSŐ ÁLLAPOT
-let editingTemplateIndex = null; // null = új, szám = szerkesztés
+let editingTemplateIndex = null;
 let builderSelectedMuscles = [];
 let builderSelectedExercises = [];
 
-// AKTÍV EDZÉSTERV ÁLLAPOT (AMIKOR EDZEL)
+// AKTÍV EDZÉSTERV ÁLLAPOT
 let activeSession = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -91,6 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
     handleMuscleGroupChange();
     resetSetRows();
     loadTemplates();
+
+    document.getElementById('cd-minutes')?.addEventListener('input', updateCountdownFromInputs);
+    document.getElementById('cd-seconds')?.addEventListener('input', updateCountdownFromInputs);
 });
 
 // --- EDZÉSTERV SABLON LOGIKA ---
@@ -114,7 +117,6 @@ function loadTemplates() {
     });
 }
 
-// SABLON KÉSZÍTŐ ÉS SZERKESZTŐ NYITÁSA/ZÁRÁSA
 toggleNewTemplateBtn.addEventListener('click', () => {
     openTemplateBuilder(null);
 });
@@ -155,7 +157,6 @@ function openTemplateBuilder(templateIndex = null) {
     createTemplateBox.classList.remove('hidden');
 }
 
-// 1. IZOMCSOPORT CHIPEK KIRAJZOLÁSA
 function renderTemplateMuscleChips() {
     templateMuscleChips.innerHTML = '';
     const allGroups = ['Mell', 'Bicepsz', 'Hát', 'Tricepsz', 'Váll', 'Láb', 'Has', 'Kardió'];
@@ -178,7 +179,6 @@ function renderTemplateMuscleChips() {
     });
 }
 
-// 2. MEGLÉVŐ GYAKORLATOK KIRAJZOLÁSA A KIJELÖLT IZOMCSOPORTOK ALAPJÁN
 function renderTemplateAvailableExercises() {
     templateAvailableExercises.innerHTML = '';
     const allExercises = getCustomExercises();
@@ -186,12 +186,10 @@ function renderTemplateAvailableExercises() {
     let available = [];
 
     if (builderSelectedMuscles.length === 0) {
-        // Ha nincs izomcsoport kijelölve, az összes létező gyakorlatot megmutatjuk
         for (const group in allExercises) {
             available = available.concat(allExercises[group]);
         }
     } else {
-        // Csak a kijelölt izomcsoportok gyakorlatai
         builderSelectedMuscles.forEach(group => {
             if (allExercises[group]) {
                 available = available.concat(allExercises[group]);
@@ -199,7 +197,6 @@ function renderTemplateAvailableExercises() {
         });
     }
 
-    // Duplikációk szűrése
     available = [...new Set(available)];
 
     if (available.length === 0) {
@@ -219,7 +216,6 @@ function renderTemplateAvailableExercises() {
     });
 }
 
-// 3. EGYEDI GYAKORLAT HOZZÁADÁSA A SABLONHOZ
 addCustomTemplateExBtn.addEventListener('click', () => {
     const val = customTemplateExInput.value.trim();
     if (val) {
@@ -229,7 +225,6 @@ addCustomTemplateExBtn.addEventListener('click', () => {
     }
 });
 
-// 4. A SABLONBA BEVÁLOGATOTT GYAKORLATOK MEGJELENÍTÉSE
 function renderTemplateSelectedExercises() {
     templateSelectedExercises.innerHTML = '';
 
@@ -254,7 +249,6 @@ function removeExerciseFromBuilder(index) {
     renderTemplateSelectedExercises();
 }
 
-// SABLON MENTÉSE
 saveNewTemplateBtn.addEventListener('click', () => {
     const name = newTemplateNameInput.value.trim();
 
@@ -276,10 +270,8 @@ saveNewTemplateBtn.addEventListener('click', () => {
     };
 
     if (editingTemplateIndex !== null) {
-        // Szerkesztés felülírása
         templates[editingTemplateIndex] = templateData;
     } else {
-        // Új hozzáadása
         templates.push(templateData);
     }
 
@@ -290,7 +282,6 @@ saveNewTemplateBtn.addEventListener('click', () => {
     alert('✅ Sablon sikeresen elmentve!');
 });
 
-// SABLON TÖRLÉSE
 deleteTemplateBtn.addEventListener('click', () => {
     const val = templateSelect.value;
     if (val === '') {
@@ -306,7 +297,6 @@ deleteTemplateBtn.addEventListener('click', () => {
     }
 });
 
-// SABLON INDÍTÁSA EDZÉSHEZ
 startTemplateBtn.addEventListener('click', () => {
     const val = templateSelect.value;
     if (val === '') {
@@ -743,24 +733,76 @@ searchFilterInput.addEventListener('input', function() {
     });
 });
 
-// STOPPER LOGIKA
-let timerInterval = null;
-let secondsLeft = 60;
-let isTimerRunning = false;
+// --- IDŐZÍTŐ ÉS STOPPER LOGIKA ---
 
-function updateTimerDisplay() {
-    const mins = Math.floor(secondsLeft / 60);
-    const secs = secondsLeft % 60;
-    document.getElementById('timer-display').textContent = 
-        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+function switchTimerTab(tab) {
+    document.getElementById('tab-stopwatch').classList.toggle('active', tab === 'stopwatch');
+    document.getElementById('tab-countdown').classList.toggle('active', tab === 'countdown');
+    
+    document.getElementById('stopwatch-view').classList.toggle('hidden', tab !== 'stopwatch');
+    document.getElementById('countdown-view').classList.toggle('hidden', tab !== 'countdown');
 }
 
-function setTimer(seconds) {
-    clearInterval(timerInterval);
-    isTimerRunning = false;
-    secondsLeft = seconds;
-    document.getElementById('start-timer-btn').textContent = 'Start';
-    updateTimerDisplay();
+// 1. STOPPER (Felfelé)
+let swInterval = null;
+let swSeconds = 0;
+
+function toggleStopwatch() {
+    const btn = document.getElementById('sw-start-btn');
+    if (swInterval) {
+        clearInterval(swInterval);
+        swInterval = null;
+        btn.textContent = 'Indítás';
+        btn.style.backgroundColor = '#00e676';
+        btn.style.color = '#000';
+    } else {
+        swInterval = setInterval(() => {
+            swSeconds++;
+            updateStopwatchDisplay();
+        }, 1000);
+        btn.textContent = 'Szünet';
+        btn.style.backgroundColor = '#ff5252';
+        btn.style.color = '#fff';
+    }
+}
+
+function resetStopwatch() {
+    clearInterval(swInterval);
+    swInterval = null;
+    swSeconds = 0;
+    updateStopwatchDisplay();
+    const btn = document.getElementById('sw-start-btn');
+    btn.textContent = 'Indítás';
+    btn.style.backgroundColor = '#00e676';
+    btn.style.color = '#000';
+}
+
+function updateStopwatchDisplay() {
+    const hrs = String(Math.floor(swSeconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((swSeconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(swSeconds % 60).padStart(2, '0');
+    document.getElementById('stopwatch-display').textContent = `${hrs}:${mins}:${secs}`;
+}
+
+// 2. VISSZASZÁMLÁLÓ (Lefelé)
+let cdInterval = null;
+let cdTotalSeconds = 60;
+
+function setCountdownPreset(seconds) {
+    resetCountdown();
+    document.getElementById('cd-minutes').value = Math.floor(seconds / 60);
+    document.getElementById('cd-seconds').value = seconds % 60;
+    updateCountdownFromInputs();
+}
+
+function updateCountdownFromInputs() {
+    const mins = parseInt(document.getElementById('cd-minutes').value) || 0;
+    const secs = parseInt(document.getElementById('cd-seconds').value) || 0;
+    cdTotalSeconds = (mins * 60) + secs;
+    
+    const displayMins = String(Math.floor(cdTotalSeconds / 60)).padStart(2, '0');
+    const displaySecs = String(cdTotalSeconds % 60).padStart(2, '0');
+    document.getElementById('countdown-display').textContent = `${displayMins}:${displaySecs}`;
 }
 
 function playBeep() {
@@ -778,33 +820,52 @@ function playBeep() {
     } catch (e) {}
 }
 
-document.getElementById('start-timer-btn').addEventListener('click', function() {
-    if (isTimerRunning) {
-        clearInterval(timerInterval);
-        isTimerRunning = false;
-        this.textContent = 'Start';
+function toggleCountdown() {
+    const btn = document.getElementById('cd-start-btn');
+    if (cdInterval) {
+        clearInterval(cdInterval);
+        cdInterval = null;
+        btn.textContent = 'Indítás';
+        btn.style.backgroundColor = '#00e676';
+        btn.style.color = '#000';
     } else {
-        isTimerRunning = true;
-        this.textContent = 'Szünet';
-        timerInterval = setInterval(() => {
-            if (secondsLeft > 0) {
-                secondsLeft--;
-                updateTimerDisplay();
-            } else {
-                clearInterval(timerInterval);
-                isTimerRunning = false;
-                document.getElementById('start-timer-btn').textContent = 'Start';
+        if (cdTotalSeconds <= 0) updateCountdownFromInputs();
+        if (cdTotalSeconds <= 0) return;
+
+        cdInterval = setInterval(() => {
+            cdTotalSeconds--;
+            
+            const displayMins = String(Math.floor(cdTotalSeconds / 60)).padStart(2, '0');
+            const displaySecs = String(cdTotalSeconds % 60).padStart(2, '0');
+            document.getElementById('countdown-display').textContent = `${displayMins}:${displaySecs}`;
+
+            if (cdTotalSeconds <= 0) {
+                clearInterval(cdInterval);
+                cdInterval = null;
+                btn.textContent = 'Indítás';
+                btn.style.backgroundColor = '#00e676';
+                btn.style.color = '#000';
                 if ('vibrate' in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
                 playBeep();
                 alert('⏱️ Lejárt a pihenőidő!');
             }
         }, 1000);
-    }
-});
 
-document.getElementById('reset-timer-btn').addEventListener('click', function() {
-    setTimer(60);
-});
+        btn.textContent = 'Szünet';
+        btn.style.backgroundColor = '#ff5252';
+        btn.style.color = '#fff';
+    }
+}
+
+function resetCountdown() {
+    clearInterval(cdInterval);
+    cdInterval = null;
+    updateCountdownFromInputs();
+    const btn = document.getElementById('cd-start-btn');
+    btn.textContent = 'Indítás';
+    btn.style.backgroundColor = '#00e676';
+    btn.style.color = '#000';
+}
 
 // SERVICE WORKER REGISZTRÁCIÓ (PWA)
 if ('serviceWorker' in navigator) {
