@@ -1,511 +1,816 @@
-// --- ALAPÉRTELMEZETT ADATOK ÉS ÁLLAPOTOK ---
-const defaultExercises = [
-    { name: "Fekvenyomás", category: "Mell" },
-    { name: "Incline fekvenyomás", category: "Mell" },
-    { name: "Tárogatás", category: "Mell" },
-    { name: "Guggolás", category: "Láb" },
-    { name: "Lábtolás", category: "Láb" },
-    { name: "Felhúzás", category: "Hát" },
-    { name: "Mellről nyomás", category: "Váll" },
-    { name: "Bicepsz franciarúddal", category: "Kar" },
-    { name: "Futópad", category: "Kardió" }
+// ELEMEK KIJELÖLÉSE
+const form = document.getElementById('workout-form');
+const dateInput = document.getElementById('workout-date');
+const muscleGroupSelect = document.getElementById('muscle-group');
+const quickExercisesContainer = document.getElementById('quick-exercises');
+const exerciseInput = document.getElementById('exercise');
+
+const resistanceFields = document.getElementById('resistance-fields');
+const setsContainer = document.getElementById('sets-container');
+const addSetBtn = document.getElementById('add-set-btn');
+const cardioFields = document.getElementById('cardio-fields');
+
+const cardioTimeInput = document.getElementById('cardio-time');
+const cardioInclineInput = document.getElementById('cardio-incline');
+const cardioSpeedInput = document.getElementById('cardio-speed');
+
+const noteInput = document.getElementById('note');
+const historyHint = document.getElementById('history-hint');
+const workoutList = document.getElementById('workout-list');
+const exportBtn = document.getElementById('export-btn');
+const importBtn = document.getElementById('import-btn');
+const importFileInput = document.getElementById('import-file');
+const searchFilterInput = document.getElementById('search-filter');
+
+// SABLON ELEMEK
+const templateSelect = document.getElementById('template-select');
+const startTemplateBtn = document.getElementById('start-template-btn');
+const editTemplateBtn = document.getElementById('edit-template-btn');
+const toggleNewTemplateBtn = document.getElementById('toggle-new-template-btn');
+const deleteTemplateBtn = document.getElementById('delete-template-btn');
+
+const createTemplateBox = document.getElementById('create-template-box');
+const templateFormTitle = document.getElementById('template-form-title');
+const newTemplateNameInput = document.getElementById('new-template-name');
+
+const templateMuscleChips = document.getElementById('template-muscle-chips');
+const templateAvailableExercises = document.getElementById('template-available-exercises');
+const customTemplateExInput = document.getElementById('custom-template-ex-input');
+const addCustomTemplateExBtn = document.getElementById('add-custom-template-ex-btn');
+const templateSelectedExercises = document.getElementById('template-selected-exercises');
+
+const saveNewTemplateBtn = document.getElementById('save-new-template-btn');
+const cancelNewTemplateBtn = document.getElementById('cancel-new-template-btn');
+
+const activeTemplateBanner = document.getElementById('active-template-banner');
+const activeTemplateInfo = document.getElementById('active-template-info');
+const cancelTemplateBtn = document.getElementById('cancel-template-btn');
+
+dateInput.value = new Date().toISOString().split('T')[0];
+
+const defaultExercises = {
+    'Mell': ['Fekvenyomás', 'Incline Fekvenyomás', 'Tárogatás'],
+    'Bicepsz': ['Bicepsz állva franciarúddal', 'Kalapács hajlítás'],
+    'Hát': ['Mellhez húzás csigán', 'Evezés döntött törzzsel', 'Húzódzkodás'],
+    'Tricepsz': ['Tricepsz letolás csigán', 'Lónyomás'],
+    'Váll': ['Vállból nyomás kézisúlyzóval', 'Oldalemelés'],
+    'Láb': ['Guggolás', 'Lábnyomás', 'Lábhajlítás gépen'],
+    'Has': ['Hasprés', 'Lábelemelés függeszkedve'],
+    'Kardió': ['Futópad (Incline walking)', 'Lépcsőzőgép', 'Szobakerékpár']
+};
+
+const defaultTemplates = [
+    {
+        name: "A nap: Mell - Tricepsz",
+        muscleGroups: ["Mell", "Tricepsz"],
+        exercises: ["Fekvenyomás", "Incline Fekvenyomás", "Tárogatás", "Tricepsz letolás csigán"]
+    },
+    {
+        name: "B nap: Hát - Bicepsz",
+        muscleGroups: ["Hát", "Bicepsz"],
+        exercises: ["Húzódzkodás", "Mellhez húzás csigán", "Evezés döntött törzzsel", "Bicepsz állva franciarúddal"]
+    },
+    {
+        name: "C nap: Láb - Váll",
+        muscleGroups: ["Láb", "Váll"],
+        exercises: ["Guggolás", "Lábnyomás", "Vállból nyomás kézisúlyzóval", "Oldalemelés"]
+    }
 ];
 
-let exercises = JSON.parse(localStorage.getItem('exercises')) || defaultExercises;
-let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory')) || [];
-let workoutTemplates = JSON.parse(localStorage.getItem('workoutTemplates')) || [];
-let selectedTemplateExercises = [];
-let editingIndex = null;
+// SABLON LÉTREHOZÓ / SZERKESZTŐ BELSŐ ÁLLAPOT
+let editingTemplateIndex = null; // null = új, szám = szerkesztés
+let builderSelectedMuscles = [];
+let builderSelectedExercises = [];
 
-// --- INICIALIZÁLÁS ---
-document.addEventListener("DOMContentLoaded", () => {
-    // Mai dátum beállítása alapértelmezetten
-    const dateInput = document.getElementById('date');
-    if (dateInput) {
-        dateInput.value = new Date().toISOString().split('T')[0];
-    }
+// AKTÍV EDZÉSTERV ÁLLAPOT (AMIKOR EDZEL)
+let activeSession = null;
 
-    renderExerciseOptions();
-    renderChips();
-    renderTemplateSelect();
-    renderHistory();
-
-    // Egy alapértelmezett sorozat hozzáadása
-    if (document.getElementById('sets-container').children.length === 0) {
-        addSetRow();
-    }
-
-    // Időzítő inputok figyelése
-    document.getElementById('cd-minutes')?.addEventListener('input', updateCountdownFromInputs);
-    document.getElementById('cd-seconds')?.addEventListener('input', updateCountdownFromInputs);
+document.addEventListener('DOMContentLoaded', () => {
+    loadWorkouts();
+    renderQuickExercises();
+    handleMuscleGroupChange();
+    resetSetRows();
+    loadTemplates();
 });
 
-// --- STOPPER ÉS IDŐZÍTŐ LOGIKA ---
-
-function switchTimerTab(tab) {
-    document.getElementById('tab-stopwatch').classList.toggle('active', tab === 'stopwatch');
-    document.getElementById('tab-countdown').classList.toggle('active', tab === 'countdown');
-    
-    document.getElementById('stopwatch-view').classList.toggle('hidden', tab !== 'stopwatch');
-    document.getElementById('countdown-view').classList.toggle('hidden', tab !== 'countdown');
+// --- EDZÉSTERV SABLON LOGIKA ---
+function getCustomTemplates() {
+    const stored = localStorage.getItem('customTemplates');
+    return stored ? JSON.parse(stored) : defaultTemplates;
 }
 
-// 1. STOPPER (Felfelé)
-let swInterval = null;
-let swSeconds = 0;
-
-function toggleStopwatch() {
-    const btn = document.getElementById('sw-start-btn');
-    if (swInterval) {
-        clearInterval(swInterval);
-        swInterval = null;
-        btn.textContent = 'Folytatás';
-        btn.style.backgroundColor = '#00e676';
-    } else {
-        swInterval = setInterval(() => {
-            swSeconds++;
-            updateStopwatchDisplay();
-        }, 1000);
-        btn.textContent = 'Szünet';
-        btn.style.backgroundColor = '#ff5252';
-    }
+function saveCustomTemplates(templates) {
+    localStorage.setItem('customTemplates', JSON.stringify(templates));
 }
 
-function resetStopwatch() {
-    clearInterval(swInterval);
-    swInterval = null;
-    swSeconds = 0;
-    updateStopwatchDisplay();
-    const btn = document.getElementById('sw-start-btn');
-    btn.textContent = 'Indítás';
-    btn.style.backgroundColor = '#00e676';
-}
-
-function updateStopwatchDisplay() {
-    const hrs = String(Math.floor(swSeconds / 3600)).padStart(2, '0');
-    const mins = String(Math.floor((swSeconds % 3600) / 60)).padStart(2, '0');
-    const secs = String(swSeconds % 60).padStart(2, '0');
-    document.getElementById('stopwatch-display').textContent = `${hrs}:${mins}:${secs}`;
-}
-
-// 2. VISSZASZÁMLÁLÓ (Lefelé)
-let cdInterval = null;
-let cdTotalSeconds = 60;
-
-function setCountdownPreset(seconds) {
-    resetCountdown();
-    document.getElementById('cd-minutes').value = Math.floor(seconds / 60);
-    document.getElementById('cd-seconds').value = seconds % 60;
-    updateCountdownFromInputs();
-}
-
-function updateCountdownFromInputs() {
-    const mins = parseInt(document.getElementById('cd-minutes').value) || 0;
-    const secs = parseInt(document.getElementById('cd-seconds').value) || 0;
-    cdTotalSeconds = (mins * 60) + secs;
-    
-    const displayMins = String(Math.floor(cdTotalSeconds / 60)).padStart(2, '0');
-    const displaySecs = String(cdTotalSeconds % 60).padStart(2, '0');
-    document.getElementById('countdown-display').textContent = `${displayMins}:${displaySecs}`;
-}
-
-function toggleCountdown() {
-    const btn = document.getElementById('cd-start-btn');
-    if (cdInterval) {
-        clearInterval(cdInterval);
-        cdInterval = null;
-        btn.textContent = 'Folytatás';
-        btn.style.backgroundColor = '#00e676';
-    } else {
-        if (cdTotalSeconds <= 0) updateCountdownFromInputs();
-        if (cdTotalSeconds <= 0) return;
-
-        cdInterval = setInterval(() => {
-            cdTotalSeconds--;
-            
-            const displayMins = String(Math.floor(cdTotalSeconds / 60)).padStart(2, '0');
-            const displaySecs = String(cdTotalSeconds % 60).padStart(2, '0');
-            document.getElementById('countdown-display').textContent = `${displayMins}:${displaySecs}`;
-
-            if (cdTotalSeconds <= 0) {
-                clearInterval(cdInterval);
-                cdInterval = null;
-                btn.textContent = 'Indítás';
-                btn.style.backgroundColor = '#00e676';
-                alert('⏱️ Letelt az idő!');
-            }
-        }, 1000);
-
-        btn.textContent = 'Szünet';
-        btn.style.backgroundColor = '#ff5252';
-    }
-}
-
-function resetCountdown() {
-    clearInterval(cdInterval);
-    cdInterval = null;
-    updateCountdownFromInputs();
-    const btn = document.getElementById('cd-start-btn');
-    btn.textContent = 'Indítás';
-    btn.style.backgroundColor = '#00e676';
-}
-
-// --- GYAKORLATOK KELÉS ÉS CSEMPÉK (CHIPEK) ---
-
-function filterExercisesByCategory() {
-    renderExerciseOptions();
-    renderChips();
-}
-
-function renderExerciseOptions() {
-    const select = document.getElementById('exercise-select');
-    const selectedCategory = document.getElementById('workout-type').value;
-    select.innerHTML = '<option value="">-- Válassz gyakorlatot --</option>';
-
-    const filtered = selectedCategory === "Összes" 
-        ? exercises 
-        : exercises.filter(ex => ex.category === selectedCategory);
-
-    filtered.forEach(ex => {
+function loadTemplates() {
+    const templates = getCustomTemplates();
+    templateSelect.innerHTML = '<option value="">-- Válassz edzéstervet --</option>';
+    templates.forEach((t, idx) => {
         const opt = document.createElement('option');
-        opt.value = ex.name;
-        opt.textContent = ex.name;
-        select.appendChild(opt);
+        opt.value = idx;
+        opt.textContent = t.name;
+        templateSelect.appendChild(opt);
     });
 }
 
-function renderChips() {
-    const chipContainer = document.getElementById('exercise-chips');
-    const selectedCategory = document.getElementById('workout-type').value;
-    chipContainer.innerHTML = '';
+// SABLON KÉSZÍTŐ ÉS SZERKESZTŐ NYITÁSA/ZÁRÁSA
+toggleNewTemplateBtn.addEventListener('click', () => {
+    openTemplateBuilder(null);
+});
 
-    const filtered = selectedCategory === "Összes" 
-        ? exercises 
-        : exercises.filter(ex => ex.category === selectedCategory);
+editTemplateBtn.addEventListener('click', () => {
+    const val = templateSelect.value;
+    if (val === '') {
+        alert('Kérlek válaszd ki a szerkeszteni kívánt sablont!');
+        return;
+    }
+    openTemplateBuilder(parseInt(val));
+});
 
-    filtered.forEach(ex => {
+cancelNewTemplateBtn.addEventListener('click', () => {
+    createTemplateBox.classList.add('hidden');
+});
+
+function openTemplateBuilder(templateIndex = null) {
+    editingTemplateIndex = templateIndex;
+    const templates = getCustomTemplates();
+
+    if (templateIndex !== null && templates[templateIndex]) {
+        const t = templates[templateIndex];
+        templateFormTitle.textContent = '✏️ Sablon Szerkesztése';
+        newTemplateNameInput.value = t.name;
+        builderSelectedMuscles = t.muscleGroups ? [...t.muscleGroups] : [];
+        builderSelectedExercises = t.exercises ? [...t.exercises] : [];
+    } else {
+        templateFormTitle.textContent = '✨ Új Sablon Létrehozása';
+        newTemplateNameInput.value = '';
+        builderSelectedMuscles = [];
+        builderSelectedExercises = [];
+    }
+
+    renderTemplateMuscleChips();
+    renderTemplateAvailableExercises();
+    renderTemplateSelectedExercises();
+    createTemplateBox.classList.remove('hidden');
+}
+
+// 1. IZOMCSOPORT CHIPEK KIRAJZOLÁSA
+function renderTemplateMuscleChips() {
+    templateMuscleChips.innerHTML = '';
+    const allGroups = ['Mell', 'Bicepsz', 'Hát', 'Tricepsz', 'Váll', 'Láb', 'Has', 'Kardió'];
+
+    allGroups.forEach(group => {
+        const isSelected = builderSelectedMuscles.includes(group);
         const chip = document.createElement('div');
-        chip.className = 'chip';
-        
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = ex.name;
-        nameSpan.onclick = () => selectExerciseFromChip(ex.name);
-        
-        const delSpan = document.createElement('span');
-        delSpan.className = 'delete-chip';
-        delSpan.textContent = '×';
-        delSpan.onclick = (e) => {
-            e.stopPropagation();
-            deleteCustomExercise(ex.name);
+        chip.className = `chip ${isSelected ? 'active' : ''}`;
+        chip.textContent = group;
+        chip.onclick = () => {
+            if (isSelected) {
+                builderSelectedMuscles = builderSelectedMuscles.filter(m => m !== group);
+            } else {
+                builderSelectedMuscles.push(group);
+            }
+            renderTemplateMuscleChips();
+            renderTemplateAvailableExercises();
         };
-
-        chip.appendChild(nameSpan);
-        chip.appendChild(delSpan);
-        chipContainer.appendChild(chip);
+        templateMuscleChips.appendChild(chip);
     });
 }
 
-function selectExerciseFromChip(name) {
-    document.getElementById('exercise-select').value = name;
-}
+// 2. MEGLÉVŐ GYAKORLATOK KIRAJZOLÁSA A KIJELÖLT IZOMCSOPORTOK ALAPJÁN
+function renderTemplateAvailableExercises() {
+    templateAvailableExercises.innerHTML = '';
+    const allExercises = getCustomExercises();
 
-function addNewCustomExercise() {
-    const input = document.getElementById('custom-exercise-input');
-    const name = input.value.trim();
-    const category = document.getElementById('workout-type').value === "Összes" ? "Mell" : document.getElementById('workout-type').value;
+    let available = [];
 
-    if (!name) return;
-
-    if (!exercises.some(ex => ex.name.toLowerCase() === name.toLowerCase())) {
-        exercises.push({ name, category });
-        localStorage.setItem('exercises', JSON.stringify(exercises));
-        renderExerciseOptions();
-        renderChips();
-        document.getElementById('exercise-select').value = name;
-        input.value = '';
+    if (builderSelectedMuscles.length === 0) {
+        // Ha nincs izomcsoport kijelölve, az összes létező gyakorlatot megmutatjuk
+        for (const group in allExercises) {
+            available = available.concat(allExercises[group]);
+        }
     } else {
-        alert('Ez a gyakorlat már létezik!');
+        // Csak a kijelölt izomcsoportok gyakorlatai
+        builderSelectedMuscles.forEach(group => {
+            if (allExercises[group]) {
+                available = available.concat(allExercises[group]);
+            }
+        });
     }
-}
 
-function deleteCustomExercise(name) {
-    if (confirm(`Biztosan törlöd a(z) "${name}" gyakorlatot?`)) {
-        exercises = exercises.filter(ex => ex.name !== name);
-        localStorage.setItem('exercises', JSON.stringify(exercises));
-        renderExerciseOptions();
-        renderChips();
+    // Duplikációk szűrése
+    available = [...new Set(available)];
+
+    if (available.length === 0) {
+        templateAvailableExercises.innerHTML = '<small style="color:#888;">Nincsenek gyakorlatok ehhez az izomcsoporthoz.</small>';
+        return;
     }
-}
 
-// --- SOROZATOK KEZELÉSE ---
-
-function addSetRow(weight = '', reps = '') {
-    const container = document.getElementById('sets-container');
-    const setIndex = container.children.length + 1;
-
-    const row = document.createElement('div');
-    row.className = 'set-row';
-    row.innerHTML = `
-        <span class="set-number">${setIndex}.</span>
-        <input type="number" step="0.5" placeholder="Súly (kg)" value="${weight}" class="set-weight" required>
-        <input type="number" placeholder="Ismétlés" value="${reps}" class="set-reps" required>
-        <button type="button" class="remove-set-btn" onclick="removeSetRow(this)">×</button>
-    `;
-
-    container.appendChild(row);
-    updateSetNumbers();
-}
-
-function removeSetRow(btn) {
-    const container = document.getElementById('sets-container');
-    if (container.children.length > 1) {
-        btn.closest('.set-row').remove();
-        updateSetNumbers();
-    } else {
-        alert('Legalább egy sorozatnak maradnia kell!');
-    }
-}
-
-function updateSetNumbers() {
-    const rows = document.querySelectorAll('.set-row');
-    rows.forEach((row, idx) => {
-        row.querySelector('.set-number').textContent = `${idx + 1}.`;
-    });
-}
-
-// --- SABLONOK KEZELÉSE ---
-
-function toggleCreateTemplateBox() {
-    const box = document.getElementById('create-template-box');
-    box.classList.toggle('hidden');
-    if (!box.classList.contains('hidden')) {
-        renderTemplateChips();
-    }
-}
-
-function renderTemplateChips() {
-    const container = document.getElementById('template-exercise-chips');
-    container.innerHTML = '';
-
-    exercises.forEach(ex => {
+    available.forEach(exName => {
         const chip = document.createElement('div');
         chip.className = 'chip';
-        if (selectedTemplateExercises.includes(ex.name)) {
-            chip.classList.add('selected-chip');
-        }
-        chip.textContent = ex.name;
-        chip.onclick = () => toggleSelectTemplateExercise(ex.name);
-        container.appendChild(chip);
+        chip.textContent = `+ ${exName}`;
+        chip.onclick = () => {
+            builderSelectedExercises.push(exName);
+            renderTemplateSelectedExercises();
+        };
+        templateAvailableExercises.appendChild(chip);
     });
 }
 
-function toggleSelectTemplateExercise(name) {
-    if (selectedTemplateExercises.includes(name)) {
-        selectedTemplateExercises = selectedTemplateExercises.filter(item => item !== name);
-    } else {
-        selectedTemplateExercises.push(name);
+// 3. EGYEDI GYAKORLAT HOZZÁADÁSA A SABLONHOZ
+addCustomTemplateExBtn.addEventListener('click', () => {
+    const val = customTemplateExInput.value.trim();
+    if (val) {
+        builderSelectedExercises.push(val);
+        customTemplateExInput.value = '';
+        renderTemplateSelectedExercises();
     }
-    renderTemplateChips();
-    
-    const textDiv = document.getElementById('selected-template-exercises-text');
-    textDiv.textContent = selectedTemplateExercises.length > 0 
-        ? `Kiválasztva: ${selectedTemplateExercises.join(', ')}` 
-        : 'Nincs kiválasztva gyakorlat.';
+});
+
+// 4. A SABLONBA BEVÁLOGATOTT GYAKORLATOK MEGJELENÍTÉSE
+function renderTemplateSelectedExercises() {
+    templateSelectedExercises.innerHTML = '';
+
+    if (builderSelectedExercises.length === 0) {
+        templateSelectedExercises.innerHTML = '<small style="color:#888;">Még nem választottál ki gyakorlatot.</small>';
+        return;
+    }
+
+    builderSelectedExercises.forEach((exName, index) => {
+        const chip = document.createElement('div');
+        chip.className = 'chip selected-chip';
+        chip.innerHTML = `
+            <span>${index + 1}. ${exName}</span>
+            <span class="delete-chip" onclick="removeExerciseFromBuilder(${index})">×</span>
+        `;
+        templateSelectedExercises.appendChild(chip);
+    });
 }
 
-function saveNewTemplate() {
-    const nameInput = document.getElementById('new-template-name');
-    const name = nameInput.value.trim();
+function removeExerciseFromBuilder(index) {
+    builderSelectedExercises.splice(index, 1);
+    renderTemplateSelectedExercises();
+}
+
+// SABLON MENTÉSE
+saveNewTemplateBtn.addEventListener('click', () => {
+    const name = newTemplateNameInput.value.trim();
 
     if (!name) {
         alert('Kérlek add meg a sablon nevét!');
         return;
     }
-    if (selectedTemplateExercises.length === 0) {
-        alert('Válassz ki legalább egy gyakorlatot!');
+
+    if (builderSelectedExercises.length === 0) {
+        alert('Kérlek válassz ki legalább 1 gyakorlatot a sablonhoz!');
         return;
     }
 
-    workoutTemplates.push({ name, exercises: [...selectedTemplateExercises] });
-    localStorage.setItem('workoutTemplates', JSON.stringify(workoutTemplates));
+    const templates = getCustomTemplates();
+    const templateData = {
+        name: name,
+        muscleGroups: builderSelectedMuscles,
+        exercises: builderSelectedExercises
+    };
 
-    nameInput.value = '';
-    selectedTemplateExercises = [];
-    toggleCreateTemplateBox();
-    renderTemplateSelect();
-}
-
-function renderTemplateSelect() {
-    const select = document.getElementById('template-select');
-    select.innerHTML = '<option value="">-- Válassz sablonok közül --</option>';
-
-    workoutTemplates.forEach((tmpl, idx) => {
-        const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = tmpl.name;
-        select.appendChild(opt);
-    });
-}
-
-function loadSelectedTemplate() {
-    const select = document.getElementById('template-select');
-    const idx = select.value;
-
-    if (idx === "") return;
-
-    const template = workoutTemplates[idx];
-    document.getElementById('active-template-banner').classList.remove('hidden');
-    document.getElementById('active-template-name').textContent = `Aktív sablon: ${template.name}`;
-}
-
-function clearActiveTemplate() {
-    document.getElementById('template-select').value = "";
-    document.getElementById('active-template-banner').classList.add('hidden');
-}
-
-// --- ŰRLAP BEKÜLDÉSE ÉS EDZÉS MENTÉSE ---
-
-document.getElementById('workout-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const date = document.getElementById('date').value;
-    const exercise = document.getElementById('exercise-select').value;
-
-    if (!exercise) {
-        alert('Kérlek válassz ki egy gyakorlatot!');
-        return;
-    }
-
-    const sets = [];
-    document.querySelectorAll('.set-row').forEach(row => {
-        const weight = parseFloat(row.querySelector('.set-weight').value) || 0;
-        const reps = parseInt(row.querySelector('.set-reps').value) || 0;
-        sets.push({ weight, reps });
-    });
-
-    const newEntry = { date, exercise, sets };
-
-    if (editingIndex !== null) {
-        workoutHistory[editingIndex] = newEntry;
-        editingIndex = null;
-        document.getElementById('save-btn').textContent = 'Edzés Mentése';
+    if (editingTemplateIndex !== null) {
+        // Szerkesztés felülírása
+        templates[editingTemplateIndex] = templateData;
     } else {
-        workoutHistory.unshift(newEntry);
+        // Új hozzáadása
+        templates.push(templateData);
     }
 
-    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-    renderHistory();
+    saveCustomTemplates(templates);
 
-    // Űrlap alaphelyzetbe állítása
-    document.getElementById('sets-container').innerHTML = '';
-    addSetRow();
-    document.getElementById('exercise-select').value = '';
+    createTemplateBox.classList.add('hidden');
+    loadTemplates();
+    alert('✅ Sablon sikeresen elmentve!');
 });
 
-// --- ELŐZMÉNYEK ÉS TÁBLÁZAT RENDERELÉSE ---
+// SABLON TÖRLÉSE
+deleteTemplateBtn.addEventListener('click', () => {
+    const val = templateSelect.value;
+    if (val === '') {
+        alert('Kérlek válaszd ki a törölni kívánt sablont!');
+        return;
+    }
+    let templates = getCustomTemplates();
+    const tName = templates[val].name;
+    if (confirm(`Biztosan törölni akarod a(z) "${tName}" sablont?`)) {
+        templates.splice(val, 1);
+        saveCustomTemplates(templates);
+        loadTemplates();
+    }
+});
 
-function renderHistory() {
-    const tbody = document.getElementById('workout-history-body');
-    tbody.innerHTML = '';
+// SABLON INDÍTÁSA EDZÉSHEZ
+startTemplateBtn.addEventListener('click', () => {
+    const val = templateSelect.value;
+    if (val === '') {
+        alert('Kérlek válaszd ki az indítani kívánt sablont!');
+        return;
+    }
+    const templates = getCustomTemplates();
+    const selectedTemplate = templates[val];
 
-    workoutHistory.forEach((entry, idx) => {
-        const tr = document.createElement('tr');
+    activeSession = {
+        templateName: selectedTemplate.name,
+        exercises: selectedTemplate.exercises,
+        currentIndex: 0
+    };
 
-        // PR ellenőrzés (legnagyobb súly a gyakorlatnál)
-        const isPR = checkPR(entry.exercise, entry.sets);
+    updateActiveSessionUI();
+});
 
-        const setsFormatted = entry.sets.map(s => `${s.weight}kg × ${s.reps}`).join('<br>');
+cancelTemplateBtn.addEventListener('click', () => {
+    activeSession = null;
+    activeTemplateBanner.classList.add('hidden');
+    exerciseInput.value = '';
+    historyHint.textContent = '';
+});
 
-        tr.innerHTML = `
-            <td>${entry.date}</td>
-            <td>
-                <strong>${entry.exercise}</strong>
-                ${isPR ? '<span class="pr-badge">PR</span>' : ''}
-            </td>
-            <td>${setsFormatted}</td>
-            <td>
-                <button class="edit-btn" onclick="editWorkout(${idx})">✏️</button>
-                <button class="delete-btn" onclick="deleteWorkout(${idx})">🗑️</button>
-            </td>
-        `;
+function updateActiveSessionUI() {
+    if (!activeSession) {
+        activeTemplateBanner.classList.add('hidden');
+        return;
+    }
 
-        tbody.appendChild(tr);
-    });
+    const total = activeSession.exercises.length;
+    const currentNum = activeSession.currentIndex + 1;
+
+    if (activeSession.currentIndex >= total) {
+        alert(`🎉 Gratulálunk! Teljesítetted a "${activeSession.templateName}" edzéstervet!`);
+        activeSession = null;
+        activeTemplateBanner.classList.add('hidden');
+        exerciseInput.value = '';
+        historyHint.textContent = '';
+        return;
+    }
+
+    const currentEx = activeSession.exercises[activeSession.currentIndex];
+    activeTemplateInfo.textContent = `📋 ${activeSession.templateName} (${currentNum}/${total}: ${currentEx})`;
+    activeTemplateBanner.classList.remove('hidden');
+
+    exerciseInput.value = currentEx;
+    autoDetectMuscleGroup(currentEx);
+    checkPreviousWeight();
 }
 
-function checkPR(exerciseName, sets) {
-    const maxWeightInEntry = Math.max(...sets.map(s => s.weight));
-    
-    // Megkeressük a gyakorlat összes korábbi bejegyzését
-    const allWeightsForExercise = workoutHistory
-        .filter(item => item.exercise === exerciseName)
-        .flatMap(item => item.sets.map(s => s.weight));
-
-    const overallMax = Math.max(...allWeightsForExercise, 0);
-
-    return maxWeightInEntry > 0 && maxWeightInEntry >= overallMax;
-}
-
-function editWorkout(idx) {
-    const entry = workoutHistory[idx];
-    editingIndex = idx;
-
-    document.getElementById('date').value = entry.date;
-    document.getElementById('exercise-select').value = entry.exercise;
-
-    const container = document.getElementById('sets-container');
-    container.innerHTML = '';
-
-    entry.sets.forEach(s => {
-        addSetRow(s.weight, s.reps);
-    });
-
-    document.getElementById('save-btn').textContent = 'Módosítás Mentése';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function deleteWorkout(idx) {
-    if (confirm('Biztosan törölni szeretnéd ezt az edzésbejegyzést?')) {
-        workoutHistory.splice(idx, 1);
-        localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-        renderHistory();
+function autoDetectMuscleGroup(exName) {
+    const allEx = getCustomExercises();
+    for (const group in allEx) {
+        if (allEx[group].some(item => item.toLowerCase() === exName.toLowerCase())) {
+            muscleGroupSelect.value = group;
+            renderQuickExercises();
+            handleMuscleGroupChange();
+            return;
+        }
     }
 }
 
-// --- EXPORTÁLÁS ÉS IMPORTÁLÁS ---
+// --- DINAMIKUS SOROZAT KEZELÉS ---
+addSetBtn.addEventListener('click', () => {
+    addSetRow();
+});
 
-function exportData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workoutHistory, null, 2));
+function addSetRow(weight = '', reps = '') {
+    const rowCount = setsContainer.children.length + 1;
+    const row = document.createElement('div');
+    row.className = 'set-row';
+    row.innerHTML = `
+        <span class="set-number">${rowCount}.</span>
+        <input type="number" class="set-weight" placeholder="Súly (kg)" step="0.5" value="${weight}">
+        <input type="number" class="set-reps" placeholder="Ismétlés" value="${reps}">
+        <button type="button" class="remove-set-btn" onclick="removeSetRow(this)">✕</button>
+    `;
+    setsContainer.appendChild(row);
+    updateRemoveButtonsVisibility();
+}
+
+function removeSetRow(btn) {
+    if (setsContainer.children.length > 1) {
+        btn.closest('.set-row').remove();
+        renumberSetRows();
+    }
+}
+
+function renumberSetRows() {
+    const rows = setsContainer.querySelectorAll('.set-row');
+    rows.forEach((row, idx) => {
+        row.querySelector('.set-number').textContent = `${idx + 1}.`;
+    });
+    updateRemoveButtonsVisibility();
+}
+
+function updateRemoveButtonsVisibility() {
+    const rows = setsContainer.querySelectorAll('.set-row');
+    rows.forEach(row => {
+        const btn = row.querySelector('.remove-set-btn');
+        if (rows.length === 1) {
+            btn.style.visibility = 'hidden';
+        } else {
+            btn.style.visibility = 'visible';
+        }
+    });
+}
+
+function resetSetRows() {
+    setsContainer.innerHTML = '';
+    addSetRow();
+}
+
+muscleGroupSelect.addEventListener('change', () => {
+    if (!activeSession) {
+        exerciseInput.value = '';
+        historyHint.textContent = '';
+    }
+    resetSetRows();
+    renderQuickExercises();
+    handleMuscleGroupChange();
+});
+
+function handleMuscleGroupChange() {
+    const isCardio = muscleGroupSelect.value === 'Kardió';
+    
+    if (isCardio) {
+        resistanceFields.classList.add('hidden');
+        cardioFields.classList.remove('hidden');
+        exerciseInput.placeholder = "pl. Futópad dőlésszöggel";
+    } else {
+        cardioFields.classList.add('hidden');
+        resistanceFields.classList.remove('hidden');
+        exerciseInput.placeholder = "pl. Fekvenyomás";
+    }
+}
+
+function getCustomExercises() {
+    const stored = localStorage.getItem('customExercises');
+    return stored ? JSON.parse(stored) : defaultExercises;
+}
+
+function saveCustomExercises(exercises) {
+    localStorage.setItem('customExercises', JSON.stringify(exercises));
+}
+
+function renderQuickExercises() {
+    quickExercisesContainer.innerHTML = '';
+    const selectedGroup = muscleGroupSelect.value;
+    const allExercises = getCustomExercises();
+    const groupExercises = allExercises[selectedGroup] || [];
+
+    groupExercises.forEach(exName => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.innerHTML = `
+            <span onclick="selectExercise('${exName}')">${exName}</span>
+            <span class="delete-chip" onclick="deleteCustomExercise(event, '${selectedGroup}', '${exName}')">×</span>
+        `;
+        quickExercisesContainer.appendChild(chip);
+    });
+}
+
+function selectExercise(name) {
+    exerciseInput.value = name;
+    checkPreviousWeight();
+}
+
+function deleteCustomExercise(event, group, name) {
+    event.stopPropagation();
+    let allExercises = getCustomExercises();
+    if (allExercises[group]) {
+        allExercises[group] = allExercises[group].filter(item => item !== name);
+        saveCustomExercises(allExercises);
+        renderQuickExercises();
+    }
+}
+
+function addCustomExerciseToGroup(group, name) {
+    let allExercises = getCustomExercises();
+    if (!allExercises[group]) allExercises[group] = [];
+    const exists = allExercises[group].some(item => item.toLowerCase() === name.toLowerCase());
+    if (!exists) {
+        allExercises[group].push(name);
+        saveCustomExercises(allExercises);
+        renderQuickExercises();
+    }
+}
+
+exerciseInput.addEventListener('input', checkPreviousWeight);
+
+function checkPreviousWeight() {
+    const query = exerciseInput.value.trim().toLowerCase();
+    if (!query) {
+        historyHint.textContent = '';
+        return;
+    }
+    const workouts = getWorkoutsFromStorage();
+    const previous = workouts.slice().reverse().find(w => w.exercise.toLowerCase() === query);
+    
+    if (previous) {
+        if (previous.isCardio) {
+            historyHint.textContent = `Legutóbb: ${previous.time} perc (${previous.incline || '-'}, ${previous.speed ? previous.speed + ' km/h' : '-'})`;
+        } else {
+            historyHint.textContent = `Legutóbb: ${previous.weight} kg x ${previous.reps} (${previous.date})`;
+        }
+    } else {
+        historyHint.textContent = '';
+    }
+}
+
+// 3. MENTÉS GOMB
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const currentDate = dateInput.value;
+    const currentMuscleGroup = muscleGroupSelect.value;
+    const currentExercise = exerciseInput.value.trim();
+    const isCardio = currentMuscleGroup === 'Kardió';
+
+    if (isCardio) {
+        let workout = {
+            id: Date.now(),
+            date: currentDate,
+            muscleGroup: currentMuscleGroup,
+            exercise: currentExercise,
+            isCardio: true,
+            time: cardioTimeInput.value,
+            incline: cardioInclineInput.value.trim(),
+            speed: cardioSpeedInput.value,
+            note: noteInput.value.trim()
+        };
+        saveWorkoutToStorage(workout);
+    } else {
+        const rows = setsContainer.querySelectorAll('.set-row');
+
+        rows.forEach((row, index) => {
+            const weightVal = row.querySelector('.set-weight').value;
+            const repsVal = row.querySelector('.set-reps').value;
+
+            if (weightVal !== '' || repsVal !== '') {
+                let workout = {
+                    id: Date.now() + index,
+                    date: currentDate,
+                    muscleGroup: currentMuscleGroup,
+                    exercise: currentExercise,
+                    isCardio: false,
+                    weight: weightVal || '0',
+                    reps: repsVal || '0',
+                    note: noteInput.value.trim()
+                };
+                saveWorkoutToStorage(workout);
+            }
+        });
+    }
+
+    addCustomExerciseToGroup(currentMuscleGroup, currentExercise);
+
+    exerciseInput.value = '';
+    cardioTimeInput.value = '';
+    cardioInclineInput.value = '';
+    cardioSpeedInput.value = '';
+    noteInput.value = '';
+    historyHint.textContent = '';
+    resetSetRows();
+
+    loadWorkouts();
+
+    if (activeSession) {
+        activeSession.currentIndex++;
+        updateActiveSessionUI();
+    }
+});
+
+function addWorkoutToTable(workout, totalSetsCount, currentSetNum, isPR) {
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-id', workout.id);
+
+    let col4 = '';
+    let col5 = '';
+
+    if (workout.isCardio) {
+        col4 = `⏱️ ${workout.time || '0'} perc`;
+        let details = [];
+        if (workout.incline) details.push(`Dőlés/Fokozat: ${workout.incline}`);
+        if (workout.speed) details.push(`${workout.speed} km/h`);
+        col5 = details.join(' | ') || '-';
+    } else {
+        const prTag = isPR ? `<span class="pr-badge">🏆 PR</span>` : '';
+        col4 = `${workout.weight} kg ${prTag}`;
+        
+        if (totalSetsCount > 1) {
+            col5 = `${workout.reps}x <small>(${currentSetNum}. sorozat)</small>`;
+        } else {
+            col5 = `${workout.reps}x`;
+        }
+    }
+
+    tr.innerHTML = `
+        <td>${workout.date}</td>
+        <td><small>${workout.muscleGroup || '-'}</small></td>
+        <td><strong>${workout.exercise}</strong></td>
+        <td>${col4}</td>
+        <td>${col5}</td>
+        <td>${workout.note || '-'}</td>
+        <td><button class="delete-btn" onclick="deleteWorkout(${workout.id})">X</button></td>
+    `;
+
+    workoutList.insertBefore(tr, workoutList.firstChild);
+}
+
+function saveWorkoutToStorage(workout) {
+    let workouts = getWorkoutsFromStorage();
+    workouts.push(workout);
+    localStorage.setItem('workouts', JSON.stringify(workouts));
+}
+
+function getWorkoutsFromStorage() {
+    return localStorage.getItem('workouts') ? JSON.parse(localStorage.getItem('workouts')) : [];
+}
+
+function loadWorkouts() {
+    workoutList.innerHTML = '';
+    const workouts = getWorkoutsFromStorage();
+
+    const maxWeights = {};
+    workouts.forEach(w => {
+        if (!w.isCardio) {
+            const exName = w.exercise.toLowerCase();
+            const weightNum = parseFloat(w.weight) || 0;
+            if (!maxWeights[exName] || weightNum > maxWeights[exName]) {
+                maxWeights[exName] = weightNum;
+            }
+        }
+    });
+
+    const setCounts = {};
+    workouts.forEach(w => {
+        if (!w.isCardio) {
+            const key = `${w.date}_${w.exercise.toLowerCase()}`;
+            setCounts[key] = (setCounts[key] || 0) + 1;
+        }
+    });
+
+    const setIndexes = {};
+
+    workouts.forEach(workout => {
+        let totalSets = 0;
+        let currentSetNum = 1;
+        let isPR = false;
+
+        if (!workout.isCardio) {
+            const exName = workout.exercise.toLowerCase();
+            const key = `${workout.date}_${exName}`;
+            totalSets = setCounts[key] || 0;
+            setIndexes[key] = (setIndexes[key] || 0) + 1;
+            currentSetNum = setIndexes[key];
+
+            const currentWeight = parseFloat(workout.weight) || 0;
+            if (currentWeight > 0 && currentWeight === maxWeights[exName]) {
+                isPR = true;
+            }
+        }
+
+        addWorkoutToTable(workout, totalSets, currentSetNum, isPR);
+    });
+}
+
+function deleteWorkout(id) {
+    let workouts = getWorkoutsFromStorage();
+    workouts = workouts.filter(w => w.id !== id);
+    localStorage.setItem('workouts', JSON.stringify(workouts));
+    loadWorkouts();
+}
+
+exportBtn.addEventListener('click', function() {
+    const workouts = getWorkoutsFromStorage();
+    if (workouts.length === 0) {
+        alert('Még nincsenek elmentett adatok!');
+        return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workouts, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `edzes_naplo_backup_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute("download", `edzesnaplo_mentes_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
-}
+});
 
-function triggerImport() {
-    document.getElementById('import-file').click();
-}
+importBtn.addEventListener('click', () => {
+    importFileInput.click();
+});
 
-function importData(event) {
-    const fileReader = new FileReader();
-    fileReader.onload = function(e) {
+importFileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
         try {
-            const importedHistory = JSON.parse(e.target.result);
-            if (Array.isArray(importedHistory)) {
-                workoutHistory = importedHistory;
-                localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-                renderHistory();
-                alert('Sikeres importálás!');
+            const importedData = JSON.parse(event.target.result);
+            if (Array.isArray(importedData)) {
+                if (confirm(`Biztosan be akarod tölteni ezt a ${importedData.length} edzésbejegyzést?`)) {
+                    const currentWorkouts = getWorkoutsFromStorage();
+                    const existingIds = new Set(currentWorkouts.map(w => w.id));
+                    const newWorkouts = importedData.filter(w => !existingIds.has(w.id));
+                    
+                    const mergedWorkouts = [...currentWorkouts, ...newWorkouts];
+                    localStorage.setItem('workouts', JSON.stringify(mergedWorkouts));
+                    
+                    loadWorkouts();
+                    alert('✅ Adatok sikeresen importálva!');
+                }
             } else {
-                alert('Érvénytelen fájlformátum!');
+                alert('⚠️ Helytelen fájlformátum!');
             }
         } catch (err) {
-            alert('Hiba történt a fájl beolvasása közben!');
+            alert('⚠️ Hiba történt a fájl beolvasása közben!');
         }
     };
-    if (event.target.files[0]) {
-        fileReader.readAsText(event.target.files[0]);
+    reader.readAsText(file);
+    this.value = '';
+});
+
+searchFilterInput.addEventListener('input', function() {
+    const filterValue = this.value.toLowerCase();
+    const rows = workoutList.querySelectorAll('tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filterValue) ? '' : 'none';
+    });
+});
+
+// STOPPER LOGIKA
+let timerInterval = null;
+let secondsLeft = 60;
+let isTimerRunning = false;
+
+function updateTimerDisplay() {
+    const mins = Math.floor(secondsLeft / 60);
+    const secs = secondsLeft % 60;
+    document.getElementById('timer-display').textContent = 
+        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function setTimer(seconds) {
+    clearInterval(timerInterval);
+    isTimerRunning = false;
+    secondsLeft = seconds;
+    document.getElementById('start-timer-btn').textContent = 'Start';
+    updateTimerDisplay();
+}
+
+function playBeep() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 800;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.8);
+        setTimeout(() => osc.stop(), 800);
+    } catch (e) {}
+}
+
+document.getElementById('start-timer-btn').addEventListener('click', function() {
+    if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        this.textContent = 'Start';
+    } else {
+        isTimerRunning = true;
+        this.textContent = 'Szünet';
+        timerInterval = setInterval(() => {
+            if (secondsLeft > 0) {
+                secondsLeft--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                document.getElementById('start-timer-btn').textContent = 'Start';
+                if ('vibrate' in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
+                playBeep();
+                alert('⏱️ Lejárt a pihenőidő!');
+            }
+        }, 1000);
     }
+});
+
+document.getElementById('reset-timer-btn').addEventListener('click', function() {
+    setTimer(60);
+});
+
+// SERVICE WORKER REGISZTRÁCIÓ (PWA)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker sikeresen regisztrálva:', reg))
+            .catch(err => console.log('Service Worker hiba:', err));
+    });
 }
