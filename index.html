@@ -10,7 +10,7 @@
     <div class="container">
         <h1>🏋️‍♂️ Edzésnapló</h1>
 
-        <!-- 1. KÜLÖNÁLLÓ PIHENŐIDŐ IDŐZÍTŐ -->
+        <!-- 1. PIHENŐIDŐ IDŐZÍTŐ (REZGÉSSEL ÉS HANGGAL) -->
         <div class="timer-card">
             <h3>⏱️ Pihenőidő Stopper</h3>
             <div id="timer-display">01:00</div>
@@ -30,6 +30,29 @@
             <div class="form-group">
                 <label for="workout-date">Dátum:</label>
                 <input type="date" id="workout-date" required>
+            </div>
+
+            <!-- IZOMCSOPORT VÁLASZTÓ -->
+            <div class="form-group">
+                <label for="muscle-group">Izomcsoport:</label>
+                <select id="muscle-group">
+                    <option value="Mell">Mell</option>
+                    <option value="Bicepsz">Bicepsz</option>
+                    <option value="Hát">Hát</option>
+                    <option value="Tricepsz">Tricepsz</option>
+                    <option value="Váll">Váll</option>
+                    <option value="Láb">Láb</option>
+                    <option value="Has">Has</option>
+                    <option value="Kardió">Kardió</option>
+                </select>
+            </div>
+
+            <!-- GYORSGYAKORLAT GOMBOK KONTÉNERE -->
+            <div class="form-group">
+                <label>Kattints a gyakorlatra (vagy írd be alább):</label>
+                <div id="quick-exercises" class="chip-container">
+                    <!-- A JavaScript ide tölti be a mentett gyakorlatokat -->
+                </div>
             </div>
 
             <div class="form-group">
@@ -57,10 +80,15 @@
             <button type="submit" id="save-btn">Mentés</button>
         </form>
 
-        <!-- 3. ELŐZMÉNYEK ÉS ADATLETÖLTÉS -->
+        <!-- 3. KERESŐ, ELŐZMÉNYEK ÉS EXPORT -->
         <div class="action-header">
             <h2>Mai és korábbi edzések</h2>
             <button id="export-btn" class="secondary-btn">💾 Adatok letöltése</button>
+        </div>
+
+        <!-- GYAKORLAT KERESŐ / SZŰRŐ MEZŐ -->
+        <div class="form-group">
+            <input type="text" id="search-filter" placeholder="🔍 Keresés gyakorlatra vagy dátumra...">
         </div>
 
         <div class="table-wrapper">
@@ -68,6 +96,7 @@
                 <thead>
                     <tr>
                         <th>Dátum</th>
+                        <th>Izomcsoport</th>
                         <th>Gyakorlat (Sorozatszám)</th>
                         <th>Súly</th>
                         <th>Ismétlés</th>
