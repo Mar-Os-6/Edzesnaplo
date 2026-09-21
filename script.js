@@ -88,17 +88,32 @@ const defaultTemplates = [
     {
         name: "A nap: Mell - Tricepsz",
         muscleGroups: ["Mell", "Tricepsz"],
-        exercises: ["Fekvenyomás", "Incline Fekvenyomás", "Tárogatás", "Tricepsz letolás csigán"]
+        exercises: [
+            { name: "Fekvenyomás", muscleGroup: "Mell" },
+            { name: "Incline Fekvenyomás", muscleGroup: "Mell" },
+            { name: "Tárogatás", muscleGroup: "Mell" },
+            { name: "Tricepsz letolás csigán", muscleGroup: "Tricepsz" }
+        ]
     },
     {
         name: "B nap: Hát - Bicepsz",
         muscleGroups: ["Hát", "Bicepsz"],
-        exercises: ["Húzódzkodás", "Mellhez húzás csigán", "Evezés döntött törzzsel", "Bicepsz állva franciarúddal"]
+        exercises: [
+            { name: "Húzódzkodás", muscleGroup: "Hát" },
+            { name: "Mellhez húzás csigán", muscleGroup: "Hát" },
+            { name: "Evezés döntött törzzsel", muscleGroup: "Hát" },
+            { name: "Bicepsz állva franciarúddal", muscleGroup: "Bicepsz" }
+        ]
     },
     {
         name: "C nap: Láb - Váll",
         muscleGroups: ["Láb", "Váll"],
-        exercises: ["Guggolás", "Lábnyomás", "Vállból nyomás kézisúlyzóval", "Oldalemelés"]
+        exercises: [
+            { name: "Guggolás", muscleGroup: "Láb" },
+            { name: "Lábnyomás", muscleGroup: "Láb" },
+            { name: "Vállból nyomás kézisúlyzóval", muscleGroup: "Váll" },
+            { name: "Oldalemelés", muscleGroup: "Váll" }
+        ]
     }
 ];
 
@@ -400,7 +415,6 @@ function renderChart() {
     });
 }
 
-
 // --- EDZÉSTERV SABLON LOGIKA ---
 function getCustomTemplates() {
     const stored = localStorage.getItem('customTemplates');
@@ -430,6 +444,16 @@ editTemplateBtn.addEventListener('click', () => {
 });
 cancelNewTemplateBtn.addEventListener('click', () => createTemplateBox.classList.add('hidden'));
 
+function findMuscleGroupForExercise(exName) {
+    const allEx = getCustomExercises();
+    for (const group in allEx) {
+        if (allEx[group].some(item => item.toLowerCase() === exName.toLowerCase())) {
+            return group;
+        }
+    }
+    return muscleGroupSelect.value || 'Mell';
+}
+
 function openTemplateBuilder(templateIndex = null) {
     editingTemplateIndex = templateIndex;
     const templates = getCustomTemplates();
@@ -438,7 +462,7 @@ function openTemplateBuilder(templateIndex = null) {
         templateFormTitle.textContent = '✏️ Sablon Szerkesztése';
         newTemplateNameInput.value = t.name;
         builderSelectedMuscles = t.muscleGroups ? [...t.muscleGroups] : [];
-        builderSelectedExercises = t.exercises ? [...t.exercises] : [];
+        builderSelectedExercises = t.exercises ? t.exercises.map(ex => typeof ex === 'string' ? { name: ex, muscleGroup: findMuscleGroupForExercise(ex) } : {...ex}) : [];
     } else {
         templateFormTitle.textContent = '✨ Új Sablon Létrehozása';
         newTemplateNameInput.value = '';
@@ -484,14 +508,23 @@ function renderTemplateAvailableExercises() {
         const chip = document.createElement('div');
         chip.className = 'chip';
         chip.textContent = `+ ${exName}`;
-        chip.onclick = () => { builderSelectedExercises.push(exName); renderTemplateSelectedExercises(); };
+        chip.onclick = () => { 
+            const mg = findMuscleGroupForExercise(exName);
+            builderSelectedExercises.push({ name: exName, muscleGroup: mg }); 
+            renderTemplateSelectedExercises(); 
+        };
         templateAvailableExercises.appendChild(chip);
     });
 }
 
 addCustomTemplateExBtn.addEventListener('click', () => {
     const val = customTemplateExInput.value.trim();
-    if (val) { builderSelectedExercises.push(val); customTemplateExInput.value = ''; renderTemplateSelectedExercises(); }
+    if (val) { 
+        const mg = muscleGroupSelect.value || (builderSelectedMuscles.length > 0 ? builderSelectedMuscles[0] : 'Mell');
+        builderSelectedExercises.push({ name: val, muscleGroup: mg }); 
+        customTemplateExInput.value = ''; 
+        renderTemplateSelectedExercises(); 
+    }
 });
 
 function renderTemplateSelectedExercises() {
@@ -500,10 +533,12 @@ function renderTemplateSelectedExercises() {
         templateSelectedExercises.innerHTML = '<small style="color:#888;">Még nem választottál ki gyakorlatot.</small>';
         return;
     }
-    builderSelectedExercises.forEach((exName, index) => {
+    builderSelectedExercises.forEach((ex, index) => {
+        const exName = typeof ex === 'string' ? ex : ex.name;
+        const exGroup = typeof ex === 'string' ? findMuscleGroupForExercise(ex) : ex.muscleGroup;
         const chip = document.createElement('div');
         chip.className = 'chip selected-chip';
-        chip.innerHTML = `<span>${index + 1}. ${exName}</span><span class="delete-chip" onclick="removeExerciseFromBuilder(${index})">×</span>`;
+        chip.innerHTML = `<span>${index + 1}. ${exName} <small style="opacity:0.8">(${exGroup})</small></span><span class="delete-chip" onclick="removeExerciseFromBuilder(${index})">×</span>`;
         templateSelectedExercises.appendChild(chip);
     });
 }
@@ -518,7 +553,11 @@ saveNewTemplateBtn.addEventListener('click', () => {
     if (!name) { alert('Kérlek add meg a sablon nevét!'); return; }
     if (builderSelectedExercises.length === 0) { alert('Kérlek válassz ki legalább 1 gyakorlatot!'); return; }
     const templates = getCustomTemplates();
-    const templateData = { name, muscleGroups: builderSelectedMuscles, exercises: builderSelectedExercises };
+    const templateData = { 
+        name, 
+        muscleGroups: builderSelectedMuscles, 
+        exercises: builderSelectedExercises.map(ex => typeof ex === 'string' ? { name: ex, muscleGroup: findMuscleGroupForExercise(ex) } : ex) 
+    };
     if (editingTemplateIndex !== null) templates[editingTemplateIndex] = templateData;
     else templates.push(templateData);
     saveCustomTemplates(templates);
@@ -542,7 +581,9 @@ startTemplateBtn.addEventListener('click', () => {
     const val = templateSelect.value;
     if (val === '') { alert('Kérlek válaszd ki az indítani kívánt sablont!'); return; }
     const templates = getCustomTemplates();
-    activeSession = { templateName: templates[val].name, exercises: templates[val].exercises, currentIndex: 0 };
+    const t = templates[val];
+    const normalizedExercises = t.exercises.map(ex => typeof ex === 'string' ? { name: ex, muscleGroup: findMuscleGroupForExercise(ex) } : ex);
+    activeSession = { templateName: t.name, exercises: normalizedExercises, currentIndex: 0 };
     updateActiveSessionUI();
 });
 
@@ -565,11 +606,17 @@ function updateActiveSessionUI() {
         historyHint.textContent = '';
         return;
     }
-    const currentEx = activeSession.exercises[activeSession.currentIndex];
-    activeTemplateInfo.textContent = `📋 ${activeSession.templateName} (${currentNum}/${total}: ${currentEx})`;
+    const currentExObj = activeSession.exercises[activeSession.currentIndex];
+    const currentExName = typeof currentExObj === 'string' ? currentExObj : currentExObj.name;
+    const currentExGroup = typeof currentExObj === 'string' ? findMuscleGroupForExercise(currentExName) : currentExObj.muscleGroup;
+
+    activeTemplateInfo.textContent = `📋 ${activeSession.templateName} (${currentNum}/${total}: ${currentExName})`;
     activeTemplateBanner.classList.remove('hidden');
-    exerciseInput.value = currentEx;
-    autoDetectMuscleGroup(currentEx);
+    
+    exerciseInput.value = currentExName;
+    muscleGroupSelect.value = currentExGroup;
+    renderQuickExercises();
+    handleMuscleGroupChange();
     checkPreviousWeight();
 }
 
